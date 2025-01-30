@@ -3,23 +3,28 @@ import 'package:board_datetime_picker/board_datetime_picker.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:matrimony_app/Model/userModel.dart';
+import 'package:matrimony_app/Provider/userProvider.dart';
+import 'package:matrimony_app/Screens/bottomNavigator.dart';
 import 'package:matrimony_app/Services/validator.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 
 class AddUserScreen extends StatefulWidget {
-  AddUserScreen({super.key});
+  UserModel? user;
+  AddUserScreen({super.key,this.user});
 
   @override
   State<AddUserScreen> createState() => _AddUserScreenState();
 }
 
 class _AddUserScreenState extends State<AddUserScreen> {
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _contactController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  TextEditingController? _firstNameController;
+  TextEditingController? _lastNameController;
+  TextEditingController? _emailController;
+  TextEditingController? _contactController;
+  TextEditingController? _passwordController;
+  TextEditingController? _confirmPasswordController;
   final _formKey = GlobalKey<FormState>();
 
   DateTime? _selectedDOB;
@@ -43,7 +48,6 @@ class _AddUserScreenState extends State<AddUserScreen> {
   Future<void> _saveImageToFolder(XFile imageFile) async {
     try {
       final Directory appDir = await getApplicationDocumentsDirectory();
-      print('App Directory Path: ${appDir.path}'); // Debugging print
 
       final Directory imageDir = Directory('${appDir.path}/SavedImages/User/');
       if (!await imageDir.exists()) {
@@ -51,8 +55,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
         print('Created new directory at: ${imageDir.path}');
       }
 
-      final String newImagePath = '${imageDir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg';
-      print('New image path: $newImagePath'); // Debugging print
+      final String newImagePath = '${imageDir.path}${DateTime.now().millisecondsSinceEpoch}.jpg';
 
       final File savedImage = await File(imageFile.path).copy(newImagePath);
 
@@ -81,6 +84,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
               Navigator.pop(context);
               _pickedImage = await imagePicker.pickImage(source: ImageSource.camera,imageQuality: 25,);
               if (_pickedImage != null) {
+                print("Image picked: ${_pickedImage!.path}");
                 await _saveImageToFolder(_pickedImage!);
               }
             },
@@ -91,6 +95,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
               Navigator.pop(context);
               _pickedImage = await imagePicker.pickImage(source: ImageSource.gallery,imageQuality: 25,);
               if (_pickedImage != null) {
+                print("Image picked: ${_pickedImage!.path}");
                 await _saveImageToFolder(_pickedImage!);
               }
             },
@@ -125,6 +130,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
       setState(() {
         _selectedDOB = pickedDate;
       });
+      print("Saved image path: $_savedImagePath");
     }
   }
 
@@ -201,10 +207,37 @@ class _AddUserScreenState extends State<AddUserScreen> {
     );
   }
 
-
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if(widget.user != null){
+      _savedImagePath = widget.user!.userImage;
+      _pickedImage = XFile(widget.user!.userImage);
+      _firstNameController = TextEditingController(text: widget.user!.userFirstName);
+      _lastNameController = TextEditingController(text: widget.user!.userLastName);
+      _emailController = TextEditingController(text: widget.user!.userEmail);
+      _contactController = TextEditingController(text: widget.user!.userContact);
+      _passwordController = TextEditingController(text: widget.user!.password);
+      _confirmPasswordController = TextEditingController(text: widget.user!.password);
+      _selectedCity = widget.user!.userCity;
+      _selectedGender = widget.user!.userGender;
+      _selectedDOB = DateTime.parse(widget.user!.userDOB);
+      _selectedHobbies = widget.user!.userHobbies.split(',');
+    }
+    else{
+      _firstNameController = TextEditingController();
+      _lastNameController = TextEditingController();
+      _emailController = TextEditingController();
+      _contactController = TextEditingController();
+      _passwordController = TextEditingController();
+      _confirmPasswordController = TextEditingController();
+    }
+  }
   
   @override
   Widget build(BuildContext context) {
+  UserProvider userProvider = Provider.of<UserProvider>(context);
     Size size=MediaQuery.of(context).size;
     return Scaffold(
       body: Padding(
@@ -246,28 +279,28 @@ class _AddUserScreenState extends State<AddUserScreen> {
                     children: [
                       _CustomInputField(
                         label: "First Name", 
-                        controller: _firstNameController, 
+                        controller: _firstNameController!, 
                         inputType: TextInputType.name,
                         validator: (value) => Validators.nameValidator(value),
                       ),
                       const SizedBox(height: 20),
                       _CustomInputField(
                         label: "Last Name", 
-                        controller: _lastNameController, 
+                        controller: _lastNameController!, 
                         inputType: TextInputType.name,
                         validator: (value) => Validators.nameValidator(value),
                       ),
                       const SizedBox(height: 20),
                       _CustomInputField(
                         label: "Email", 
-                        controller: _emailController, 
+                        controller: _emailController!, 
                         inputType: TextInputType.emailAddress,
                         validator: (value) => Validators.emailValidator(value),
                       ),
                       const SizedBox(height: 20),
                       _CustomInputField(
                         label: "Contact Number", 
-                        controller: _contactController, 
+                        controller: _contactController!, 
                         inputType: TextInputType.phone,
                         validator: (value) => Validators.mobileNumberValidator(value),
                         ),
@@ -401,17 +434,6 @@ class _AddUserScreenState extends State<AddUserScreen> {
                                   },
                                 ),
                                 const Text("Female"),
-                                const SizedBox(width: 10,),
-                                Radio<String>(
-                                  value: "Other",
-                                  groupValue: _selectedGender,
-                                  onChanged: (String? value) {
-                                    setState(() {
-                                      _selectedGender = value;
-                                    });
-                                  },
-                                ),
-                                const Text("Other"),
                               ],
                             )
                           ],
@@ -449,7 +471,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
                       const SizedBox(height: 20,),
                       _CustomInputField(
                         label: "Password", 
-                        controller: _passwordController,
+                        controller: _passwordController!,
                         icon: Icon(passwordVisible ? Icons.visibility_off : Icons.visibility),
                         iconOnPress: () => setState(() {passwordVisible = !passwordVisible;}),
                         obscureText: passwordVisible,
@@ -458,7 +480,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
                       const SizedBox(height: 20,),
                       _CustomInputField(
                         label: "Confirm Password", 
-                        controller: _confirmPasswordController,
+                        controller: _confirmPasswordController!,
                         icon: Icon(confirmPasswordVisible ? Icons.visibility_off : Icons.visibility),
                         iconOnPress: () => setState(() {confirmPasswordVisible = !confirmPasswordVisible;}),
                         obscureText: confirmPasswordVisible,
@@ -466,36 +488,60 @@ class _AddUserScreenState extends State<AddUserScreen> {
                       ),
                       const SizedBox(height: 20,),
                       ElevatedButton(
-                        child: Text("Add User"),
+                        child: widget.user!=null ? Text("Update User") : Text("Add User"),
                         onPressed: () {
-                          if(_formKey.currentState!.validate()){ 
-                            print(":::::_pickedImage::${_pickedImage.toString()}:::::");
-                            print(":::::_savedImagePath::${_savedImagePath}:::::");
-                            print(":::::firstName::${_firstNameController.text}:::::");
-                            print(":::::lastName::${_lastNameController.text}:::::");
-                            print(":::::Email::${_emailController.text}:::::");
-                            print(":::::Contact::${_contactController.text}:::::");
-                            print(":::::DOB::${_selectedDOB.toString()}:::::");
-                            print(":::::City::${_selectedCity.toString()}:::::");
-                            print(":::::Gender::${_selectedGender.toString()}:::::");
-                            print(":::::Hobbies::${_selectedHobbies.toString()}:::::");
-                            print(":::::Password::${_passwordController.text}:::::");
-                            print(":::::ConfirmPassword::${_confirmPasswordController.text}:::::");
-                          }
-                          else if(_passwordController.text != _confirmPasswordController.text){
+                          if(_passwordController!.text != _confirmPasswordController!.text){
                             print("Password and Confirm Password does not match");
                           }
-                          else if(_pickedImage != null){
+                          else if(_pickedImage == null){
                             print("Please Select a Profile Picture");
                           }
-                          else if(_selectedCity != null){
+                          else if(_selectedCity == null){
                             print("Please select User's City");
                           }
-                          else if(_selectedGender != null){
+                          else if(_selectedGender == null){
                             print("Please select User's Gender");
                           }
                           else if(_selectedHobbies.isEmpty){
                             print("Please select User's Hobbies");
+                          }
+                          else if(_formKey.currentState!.validate()){
+                            if(widget.user == null){
+                              UserModel user = UserModel(
+                                userId: userProvider.index, 
+                                userFirstName: _firstNameController!.text, 
+                                userLastName: _lastNameController!.text, 
+                                userImage: _savedImagePath!, 
+                                userEmail: _emailController!.text, 
+                                userContact: _contactController!.text, 
+                                userCity: _selectedCity!, 
+                                userGender: _selectedGender!, 
+                                userDOB: _selectedDOB.toString(), 
+                                userHobbies: _selectedHobbies.toString(), 
+                                password: _passwordController!.text, 
+                                isFavorite: 0
+                              );
+                              userProvider.addUser(user: user);
+                              Navigator.of(context).push(MaterialPageRoute(builder: (context) => RootScreen(),));
+                            }
+                            else{
+                               UserModel user = UserModel(
+                                userId: widget.user!.userId, 
+                                userFirstName: _firstNameController!.text, 
+                                userLastName: _lastNameController!.text, 
+                                userImage: _savedImagePath!, 
+                                userEmail: _emailController!.text, 
+                                userContact: _contactController!.text, 
+                                userCity: _selectedCity!, 
+                                userGender: _selectedGender!, 
+                                userDOB: _selectedDOB.toString(), 
+                                userHobbies: _selectedHobbies.toString(), 
+                                password: _passwordController!.text, 
+                                isFavorite: 0
+                              );
+                              userProvider.updateUser(index: widget.user!.userId, user: user);
+                              Navigator.of(context).push(MaterialPageRoute(builder: (context) => RootScreen(),));
+                            }
                           }
                         },
                       )

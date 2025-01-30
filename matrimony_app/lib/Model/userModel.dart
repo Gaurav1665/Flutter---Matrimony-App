@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 class UserModel with ChangeNotifier{
 
-  final int userId, isFavorite;
+  int userId, isFavorite;
 
-  final String userFirstName, userLastName, userImage, userEmail, userContact, userCity, userGender, userDOB, userHobbies, password, confirmPassword;
+  String userFirstName, userLastName, userImage, userEmail, userContact, userCity, userGender, userDOB, userHobbies, password;
 
   UserModel({
     required this.userId,
@@ -18,7 +18,6 @@ class UserModel with ChangeNotifier{
     required this.userDOB,
     required this.userHobbies,
     required this.password,
-    required this.confirmPassword,
     required this.isFavorite
   });
 

@@ -3,27 +3,29 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:matrimony_app/Model/userModel.dart';
 import 'package:matrimony_app/Provider/userProvider.dart';
+import 'package:matrimony_app/Screens/addUser.dart';
+import 'package:matrimony_app/Screens/bottomNavigator.dart';
+import 'package:provider/provider.dart';
 import 'package:slideable/slideable.dart';
 
-class SearchUser extends StatefulWidget {
-  const SearchUser({super.key});
+class SearchUserScreen extends StatefulWidget {
+  const SearchUserScreen({super.key});
 
   @override
-  State<SearchUser> createState() => _SearchUserState();
+  State<SearchUserScreen> createState() => _SearchUserScreenState();
 }
 
-class _SearchUserState extends State<SearchUser> {
+class _SearchUserScreenState extends State<SearchUserScreen> {
   TextEditingController search = TextEditingController();
 
   List<UserModel> searchedUser = [];
 
   int? resetSlideIndex = 0;
 
-  UserProvider userProvider = UserProvider();
   @override
   Widget build(BuildContext context) {
+  UserProvider userProvider = Provider.of<UserProvider>(context);
     return Scaffold(
-      appBar: AppBar(title: Text("Matrimony App"),),
       body: userProvider.userList.isEmpty 
       ? Center(child: Text("No User Found"))
       : Column(
@@ -60,21 +62,20 @@ class _SearchUserState extends State<SearchUser> {
               itemCount: search.text.isNotEmpty ? searchedUser.length : userProvider.userList.length,
               itemBuilder: (context, index) {
                 UserModel _user = search.text.isNotEmpty ? searchedUser[index] : userProvider.userList[index];
-                  return GestureDetector(
-                    onLongPressDown: (val) {
-                      // This allows you the time taken for a user to slide upon the widget in the list.
-                      // NB: Using the onTap or onHorizontalDragStart seemed to have caused a seizure in the widget, hence my resulting to onLongPressDown
-                      setState(() {
-                        // This updates the widget, and inturn rebuilds it, thereby notifying the Slidable widget to close an already slide item
-                        resetSlideIndex = index;
-                      });
-                    },
-                    child: _listItem(
-                      context: context,
-                      user: _user,
-                      index: index,
-                      resetSlide: index == resetSlideIndex ? false : true, 
-                      // Reverse engineering the notion, meaning the Slidable widget will close all slid item, except one with false, i.e the currently slide item
+                  return Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10,vertical: 5),
+                    child: GestureDetector(
+                      onLongPressDown: (val) {
+                        setState(() {
+                          resetSlideIndex = index;
+                        });
+                      },
+                      child: _listItem(
+                        context: context,
+                        user: _user,
+                        index: index,
+                        resetSlide: index == resetSlideIndex ? false : true, 
+                      ),
                     ),
                   );
               },
@@ -90,6 +91,7 @@ class _SearchUserState extends State<SearchUser> {
     required int index,
     required bool resetSlide,
   }) {
+  UserProvider userProvider = Provider.of<UserProvider>(context);
     return Slideable(
       resetSlide: resetSlide,
       items: <ActionItems>[
@@ -106,7 +108,9 @@ class _SearchUserState extends State<SearchUser> {
             Icons.delete,
             color: Colors.red,
           ),
-          onPress: () {},
+          onPress: () {
+            userProvider.deleteUser(index: index);
+          },
           backgroudColor: Colors.transparent,
         ),
       ],
@@ -139,9 +143,25 @@ class _SearchUserState extends State<SearchUser> {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(100),
-                child: Image.file(
-                  userProvider.getImageFileFromDocuments(user.userImage) as File,
-                  fit: BoxFit.cover,
+                child: FutureBuilder<File>(
+                  future: userProvider.getImageFileFromDocuments(user.userImage),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    } 
+                    else if (snapshot.hasError) {
+                      return Icon(Icons.error);
+                    } 
+                    else if (snapshot.hasData) {
+                      return Image.file(
+                        snapshot.data!,
+                        fit: BoxFit.cover,
+                      );
+                    } 
+                    else {
+                      return Icon(Icons.broken_image);
+                    }
+                  },
                 ),
               ),
             ),
@@ -149,7 +169,7 @@ class _SearchUserState extends State<SearchUser> {
               width: 5,
             ),
             Expanded(
-              child: Column(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
@@ -162,7 +182,7 @@ class _SearchUserState extends State<SearchUser> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    user.userFirstName + " " + user.userLastName,
+                    "${user.userFirstName} ${user.userLastName}",
                     style: const TextStyle(
                       fontWeight: FontWeight.w500,
                     ),
@@ -170,6 +190,12 @@ class _SearchUserState extends State<SearchUser> {
                 ],
               ),
             ),
+            IconButton(
+              icon: Icon(Icons.edit), 
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) => RootScreen(user: user,),));
+              },
+            )
           ],
         ),
       ),

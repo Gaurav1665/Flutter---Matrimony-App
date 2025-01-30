@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:matrimony_app/Screens/bottomNavigator.dart';
+import 'Provider/userProvider.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => UserProvider(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -11,8 +18,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
       home: RootScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
