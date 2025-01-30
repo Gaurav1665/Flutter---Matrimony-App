@@ -43,13 +43,16 @@ class _AddUserScreenState extends State<AddUserScreen> {
   Future<void> _saveImageToFolder(XFile imageFile) async {
     try {
       final Directory appDir = await getApplicationDocumentsDirectory();
+      print('App Directory Path: ${appDir.path}'); // Debugging print
 
-      final Directory imageDir = Directory('${appDir.path}/SavedImages');
+      final Directory imageDir = Directory('${appDir.path}/SavedImages/User/');
       if (!await imageDir.exists()) {
         await imageDir.create(recursive: true);
+        print('Created new directory at: ${imageDir.path}');
       }
 
       final String newImagePath = '${imageDir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      print('New image path: $newImagePath'); // Debugging print
 
       final File savedImage = await File(imageFile.path).copy(newImagePath);
 
@@ -58,8 +61,9 @@ class _AddUserScreenState extends State<AddUserScreen> {
       });
 
       print('Image saved to: $newImagePath');
-    } catch (e) {
+    } catch (e, stackTrace) {
       print('Error saving image: $e');
+      print('Stack trace: $stackTrace');
     }
   }
 
@@ -113,6 +117,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
       context: context,
       pickerType: DateTimePickerType.date,
       initialDate: _selectedDOB ?? DateTime.now(),
+      maximumDate: DateTime(DateTime.now().year-18),
       minimumDate: DateTime(DateTime.now().year-80)
     );
 
@@ -211,10 +216,18 @@ class _AddUserScreenState extends State<AddUserScreen> {
                 height: size.width*0.4,
                 width: size.width*0.4,
                 child: _savedImagePath != null
-                ? Image.file(
-                    File(_savedImagePath!),
-                    fit: BoxFit.cover,
-                  )
+                ? GestureDetector(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20.0),
+                    child: Image.file(
+                      File(_savedImagePath!),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  onTap: () {
+                    localImagePicker();
+                  },
+                )
                 : GestureDetector(
                   child: Container(
                     decoration: BoxDecoration(border: Border.all(color: Colors.black),borderRadius: BorderRadius.circular(20)),
