@@ -519,7 +519,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
                                 userDOB: _selectedDOB.toString(), 
                                 userHobbies: _selectedHobbies.toString(), 
                                 password: _passwordController!.text, 
-                                isFavorite: 0
+                                isFavorite: false
                               );
                               userProvider.addUser(user: user);
                               Navigator.of(context).push(MaterialPageRoute(builder: (context) => RootScreen(),));
@@ -537,7 +537,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
                                 userDOB: _selectedDOB.toString(), 
                                 userHobbies: _selectedHobbies.toString(), 
                                 password: _passwordController!.text, 
-                                isFavorite: 0
+                                isFavorite: false
                               );
                               userProvider.updateUser(index: widget.user!.userId, user: user);
                               Navigator.of(context).push(MaterialPageRoute(builder: (context) => RootScreen(),));

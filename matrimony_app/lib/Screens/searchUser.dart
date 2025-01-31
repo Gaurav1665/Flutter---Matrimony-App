@@ -96,11 +96,15 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
       resetSlide: resetSlide,
       items: <ActionItems>[
         ActionItems(
-          icon: const Icon(
-            Icons.thumb_up,
+          icon: Icon(
+            user.isFavorite ? Icons.thumb_up : Icons.thumb_up_outlined,
             color: Colors.blue,
           ),
-          onPress: (){} ,
+          onPress: (){
+            setState(() {
+              user.isFavorite = !user.isFavorite;
+            });
+          } ,
           backgroudColor: Colors.transparent,
         ),
         ActionItems(
@@ -173,17 +177,18 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    "Name",
+                    "Name : ",
                     style: TextStyle(
-                      color: Colors.grey,
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(width: 10),
                   Text(
                     "${user.userFirstName} ${user.userLastName}",
                     style: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

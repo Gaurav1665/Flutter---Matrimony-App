@@ -1,8 +1,12 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 
 class UserModel with ChangeNotifier{
 
-  int userId, isFavorite;
+  int userId;
+
+  bool isFavorite;
 
   String userFirstName, userLastName, userImage, userEmail, userContact, userCity, userGender, userDOB, userHobbies, password;
 
