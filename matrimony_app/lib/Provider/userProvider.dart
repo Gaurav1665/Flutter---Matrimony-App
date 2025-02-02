@@ -1,48 +1,104 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:matrimony_app/Model/userModel.dart';
+import 'package:sqflite/sqflite.dart';
 
-class UserProvider with ChangeNotifier{
-  List<UserModel> userList = [];
-  int index = 0;
+class UserProvider with ChangeNotifier {
+  Future<Database> initDatabase() async {
+    String path = 'asset/database/matrimony.db';
+    return await openDatabase(path, onCreate: (db, version) async {
+      await db.execute('''
+        CREATE TABLE User (
+          userId INTEGER PRIMARY KEY AUTOINCREMENT,
+          userFirstName TEXT NOT NULL,
+          userLastName TEXT NOT NULL,
+          userImage TEXT NOT NULL,
+          userEmail TEXT NOT NULL UNIQUE,
+          userContact TEXT NOT NULL,
+          userCity TEXT NOT NULL,
+          userGender TEXT NOT NULL,
+          userDOB TEXT NOT NULL,
+          userHobbies TEXT,
+          password TEXT NOT NULL,
+          isFavorite INTEGER NOT NULL DEFAULT 0
+        );''');
+    }, version: 1);
+  }
+
+  Future<List<UserModel>> fetchUser () async {
+    Database db = await initDatabase();
+    List<Map<String, dynamic>> userMaps = await db.rawQuery("SELECT * FROM User");
+    return userMaps.map((userMap) => UserModel(
+      userId: userMap['userId'],
+      userFirstName: userMap['userFirstName'],
+      userLastName: userMap['userLastName'],
+      userImage: userMap['userImage'],
+      userEmail: userMap['userEmail'],
+      userContact: userMap['userContact'],
+      userCity: userMap['userCity'],
+      userGender: userMap['userGender'],
+      userDOB: userMap['userDOB'],
+      userHobbies: userMap['userHobbies'],
+      password: userMap['password'],
+      isFavorite: userMap['isFavorite'] == 1,
+    )).toList();
+  }
+
+  Future<void> addUser ({required UserModel user}) async {
+    Database db = await initDatabase();
+    await db.insert('User ', {
+      'userFirstName': user.userFirstName,
+      'userLastName': user.userLastName,
+      'userImage': user.userImage,
+      'userEmail': user.userEmail,
+      'userContact': user.userContact,
+      'userCity': user.userCity,
+      'userGender': user.userGender,
+      'userDOB': user.userDOB,
+      'userHobbies': user.userHobbies,
+      'password': user.password,
+      'isFavorite': 0,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<void> deleteUser (int userId) async {
+    Database db = await initDatabase();
+    await db.delete('User ', where: 'userId = ?', whereArgs: [userId]);
+  }
+
+  Future<bool> likebutton({required int userId, required bool isFavorite}) async {
+    Database db = await initDatabase();
+    await db.update('User ', {'isFavorite': isFavorite ? 1 : 0}, where: 'userId = ?', whereArgs: [userId]);
+    return isFavorite;
+  }
+
+  Future<void> updateUser ({required UserModel user}) async {
+    Database db = await initDatabase();
+    await db.update('User ', {
+      'userFirstName': user.userFirstName,
+      'userLastName': user.userLastName,
+      'userImage': user.userImage,
+      'userEmail': user.userEmail,
+      'userContact': user.userContact,
+      'userCity': user.userCity,
+      'userGender': user.userGender,
+      'userDOB': user.userDOB,
+      'userHobbies': user.userHobbies,
+      'password': user.password,
+      'isFavorite': user.isFavorite,
+    }, where: 'userId = ?', whereArgs: [user.userId]);
+  }
 
   Future<File> getImageFileFromDocuments(String fileName) async {
-    final imageFile = File(fileName);
-    return imageFile;
+    return File(fileName);
   }
 
-  void addUser({required UserModel user}){
-    userList.add(user);
-    index++;
-    notifyListeners();
-  }
-
-  void deleteUser({required int index}){
-    userList.removeAt(index);
-    notifyListeners();
-  }
-
-  void updateUser({required int index, required UserModel user}){
-    int userIndex = userList.indexWhere((user) => user.userId == index);
-
-    if(userIndex!=-1){
-      userList[userIndex].userFirstName = user.userFirstName;
-      userList[userIndex].userLastName = user.userLastName;
-      userList[userIndex].userEmail = user.userEmail;
-      userList[userIndex].userContact = user.userContact;
-      userList[userIndex].userCity = user.userCity;
-      userList[userIndex].userGender = user.userGender;
-      userList[userIndex].userDOB = user.userDOB;
-      userList[userIndex].userHobbies = user.userHobbies;
-      userList[userIndex].userImage = user.userImage;
-    }
-    else{
-      print("User not Found");
-    }
-  }
-
-  List<UserModel> searchUser({String? searchText}){
-    return userList.where((element) => (element.userFirstName.toLowerCase()==searchText!.toLowerCase()) || (element.userLastName.toLowerCase()==searchText.toLowerCase())).toList();
+  Future<List<UserModel>> searchUser ({String? searchText}) async {
+    List<UserModel> users = await fetchUser ();
+    if (searchText == null || searchText.isEmpty) return users;
+    return users.where((user) =>
+      user.userFirstName.toLowerCase().contains(searchText.toLowerCase()) ||
+      user.userLastName.toLowerCase().contains(searchText.toLowerCase())
+    ).toList();
   }
 }
