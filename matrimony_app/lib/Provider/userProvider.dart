@@ -10,8 +10,7 @@ class UserProvider with ChangeNotifier {
       await db.execute('''
         CREATE TABLE User (
           userId INTEGER PRIMARY KEY AUTOINCREMENT,
-          userFirstName TEXT NOT NULL,
-          userLastName TEXT NOT NULL,
+          userFullName TEXT NOT NULL,
           userImage TEXT NOT NULL,
           userEmail TEXT NOT NULL UNIQUE,
           userContact TEXT NOT NULL,
@@ -30,8 +29,7 @@ class UserProvider with ChangeNotifier {
     List<Map<String, dynamic>> userMaps = await db.rawQuery("SELECT * FROM User");
     return userMaps.map((userMap) => UserModel(
       userId: userMap['userId'],
-      userFirstName: userMap['userFirstName'],
-      userLastName: userMap['userLastName'],
+      userFullName: userMap['userFullName'],
       userImage: userMap['userImage'],
       userEmail: userMap['userEmail'],
       userContact: userMap['userContact'],
@@ -47,8 +45,7 @@ class UserProvider with ChangeNotifier {
   Future<void> addUser ({required UserModel user}) async {
     Database db = await initDatabase();
     await db.insert('User ', {
-      'userFirstName': user.userFirstName,
-      'userLastName': user.userLastName,
+      'userFullName': user.userFullName,
       'userImage': user.userImage,
       'userEmail': user.userEmail,
       'userContact': user.userContact,
@@ -75,8 +72,7 @@ class UserProvider with ChangeNotifier {
   Future<void> updateUser ({required UserModel user}) async {
     Database db = await initDatabase();
     await db.update('User ', {
-      'userFirstName': user.userFirstName,
-      'userLastName': user.userLastName,
+      'userFullName': user.userFullName,
       'userImage': user.userImage,
       'userEmail': user.userEmail,
       'userContact': user.userContact,
@@ -97,8 +93,7 @@ class UserProvider with ChangeNotifier {
     List<UserModel> users = await fetchUser ();
     if (searchText == null || searchText.isEmpty) return users;
     return users.where((user) =>
-      user.userFirstName.toLowerCase().contains(searchText.toLowerCase()) ||
-      user.userLastName.toLowerCase().contains(searchText.toLowerCase())
+      user.userFullName.toLowerCase().contains(searchText.toLowerCase())
     ).toList();
   }
 }

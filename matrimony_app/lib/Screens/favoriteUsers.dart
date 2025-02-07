@@ -97,7 +97,9 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
           icon: Icon(user.isFavorite ? Icons.thumb_up : Icons.thumb_up_outlined, color: Colors.blue),
           onPress: () async {
             user.isFavorite = await userProvider.likebutton(userId: user.userId!, isFavorite: !user.isFavorite);
-            setState(() {});
+            searchedUser = getFavoriteUsers();
+            setState(() {
+            });
           },
           backgroudColor: Colors.transparent,
         ),
@@ -139,7 +141,7 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
                 children: [
                   const Text("Name :", style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
                   const SizedBox(width: 10),
-                  Text("${user.userFirstName} ${user.userLastName}", style: const TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.w500)),
+                  Text("${user.userFullName}", style: const TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.w500)),
                 ],
               ),
             ),

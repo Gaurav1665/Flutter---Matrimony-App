@@ -39,7 +39,7 @@ class _RootScreenState extends State<RootScreen> {
       child: Scaffold(
         backgroundColor: Colors.amber,
         appBar: AppBar(
-          title: Text("Matrimonial App"),
+          title: Text("Matrify"),
           automaticallyImplyLeading: false,
         ),
         body: PageView(

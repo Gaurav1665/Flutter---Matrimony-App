@@ -95,32 +95,36 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
   }
 
   void _showUserInfoDialog(BuildContext context, UserModel user) {
+    Size size = MediaQuery.of(context).size;
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(20),
           ),
           contentPadding: EdgeInsets.all(16),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              CircleAvatar(
-                radius: 50,
-                child: Image.file(File(user.userImage)),
-                
+              Container(
+                height: size.width*0.3,
+                width: size.width*0.3,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(100),
+                  child: Image.file(File(user.userImage), fit: BoxFit.cover),                
+                ),
               ),
               SizedBox(height: 10),
-              Text("${user.userFirstName} ${user.userLastName}", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text("${user.userFullName}", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               SizedBox(height: 10),
-              Text("Email: ${user.userEmail}", style: TextStyle(fontSize: 16)),
-              Text("Contact: ${user.userContact}", style: TextStyle(fontSize: 16)),
-              Text("City: ${user.userCity}", style: TextStyle(fontSize: 16)),
-              Text("Gender: ${user.userGender}", style: TextStyle(fontSize: 16)),
-              Text("DOB: ${user.userDOB}", style: TextStyle(fontSize: 16)),
-              Text("Hobbies: ${user.userHobbies}", style: TextStyle(fontSize: 16)),
+              _buildTableRow("Email:", user.userEmail),
+              _buildTableRow("Contact:", user.userContact),
+              _buildTableRow("City:", user.userCity),
+              _buildTableRow("Gender:", user.userGender),
+              _buildTableRow("DOB:", user.userDOB),
+              _buildTableRow("Hobbies:", user.userHobbies),
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
@@ -132,6 +136,36 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildTableRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            "$label",
+            style: TextStyle(
+              fontSize: 16.0,
+              fontWeight: FontWeight.w600,
+              color: Colors.blueGrey[700],
+            ),
+          ),
+          SizedBox(width: 10,),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.w400,
+                color: Colors.blueGrey[600],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -194,15 +228,9 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
                 children: [
                   const Text("Name: ", style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
                   const SizedBox(width: 10),
-                  Text("${user.userFirstName} ${user.userLastName}", style: const TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.w500)),
+                  Text("${user.userFullName}", style: const TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.w500)),
                 ],
               ),
-            ),
-            IconButton(
-              icon: Icon(Icons.edit),
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (context) => RootScreen(user: user)));
-              },
             ),
           ],
         ),
