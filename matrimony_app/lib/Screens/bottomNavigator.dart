@@ -1,5 +1,6 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:matrimony_app/Model/userModel.dart';
 import 'package:matrimony_app/Screens/aboutUs.dart';
 import 'package:matrimony_app/Screens/addUser.dart';
@@ -39,7 +40,7 @@ class _RootScreenState extends State<RootScreen> {
       child: Scaffold(
         backgroundColor: Colors.amber,
         appBar: AppBar(
-          title: Text("Matrify"),
+          title: Text("MATRIFY",style: GoogleFonts.nunito(fontWeight: FontWeight.bold, letterSpacing: 3)),
           automaticallyImplyLeading: false,
         ),
         body: PageView(

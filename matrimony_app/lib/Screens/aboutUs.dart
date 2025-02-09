@@ -13,11 +13,31 @@ class AboutUsScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Image.asset(
-                "asset/images/logo.png",
-                height: 120,
+              Card(
+                elevation: 6,
+                child: Image.asset(
+                  "asset/images/logo.png",
+                  height: 75,
+                  width: 75,
+                ),
               ),
-              Text("––––MATRIFY––––", style: TextStyle(letterSpacing: 3, fontSize: 20, fontWeight: FontWeight.bold),),
+              SizedBox(height: 10,),
+              Text(
+              "MATRIFY",
+                style: TextStyle(
+                  letterSpacing: 5,
+                  fontSize: 35,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Pacifico',
+                  shadows: [
+                    Shadow(
+                      blurRadius: 10.0,
+                      color: Colors.black.withOpacity(0.5),
+                      offset: Offset(3.0, 3.0),
+                    ),
+                  ],
+                ),
+              ),
               SizedBox(height: 20),
               Card(
                 color: Colors.white,

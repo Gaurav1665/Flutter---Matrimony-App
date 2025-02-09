@@ -170,6 +170,16 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
   }
 
   Slideable _listItem({required BuildContext context, required UserModel user}) {
+    int calculateAge(DateTime dob) {
+      DateTime today = DateTime.now();
+      int age = today.year - dob.year;
+      if (today.month < dob.month ||
+          (today.month == dob.month && today.day < dob.day)) {
+        age--;
+      }
+      return age;
+    }
+
     UserProvider userProvider = Provider.of<UserProvider>(context);
     return Slideable(
       items: <ActionItems>[
@@ -191,50 +201,94 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
           backgroudColor: Colors.transparent,
         ),
       ],
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-        decoration: BoxDecoration(
-          color: Color.fromARGB(255, 214, 214, 214),
-          border: Border.all(width: 1, color: Color.fromARGB(124, 158, 158, 158)),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              height: 50,
-              width: 50,
-              decoration: BoxDecoration(
-                color: Colors.grey[350],
-                shape: BoxShape.circle,
-                border: Border.all(width: 1, color: Colors.white),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(100),
-                child: FutureBuilder<File>(
-                  future: userProvider.getImageFileFromDocuments(user.userImage),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) return CircularProgressIndicator();
-                    if (snapshot.hasError) return Icon(Icons.error);
-                    return snapshot.hasData ? Image.file(snapshot.data!, fit: BoxFit.cover) : Icon(Icons.broken_image);
-                  },
+      child: Card(
+        elevation: 3,
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 15,vertical: 5),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(width: 1, color: Color.fromARGB(124, 158, 158, 158)),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                height: 60,
+                width: 60,
+                decoration: BoxDecoration(
+                  color: Colors.grey[350],
+                  shape: BoxShape.circle,
+                  border: Border.all(width: 1, color: Colors.white),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(100),
+                  child: FutureBuilder<File>(
+                    future: userProvider.getImageFileFromDocuments(user.userImage),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting)
+                        return CircularProgressIndicator();
+                      if (snapshot.hasError) return Icon(Icons.error);
+                      return snapshot.hasData
+                          ? Image.file(snapshot.data!, fit: BoxFit.cover)
+                          : Icon(Icons.broken_image);
+                    },
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 5),
-            Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text("Name: ", style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
-                  const SizedBox(width: 10),
-                  Text("${user.userFullName}", style: const TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.w500)),
-                ],
+              const SizedBox(width: 15),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.person, size: 25),
+                        const SizedBox(width: 8),
+                        Text(
+                          user.userFullName,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(" | "),
+                        const SizedBox(width: 10),
+                        Text(
+                          "${calculateAge(DateTime.parse(user.userDOB))} years old",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Row(
+                      children: [
+                        Icon(Icons.location_city, size: 25),
+                        const SizedBox(width: 8),
+                        Text(
+                          user.userCity,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
+      )
     );
   }
 }
