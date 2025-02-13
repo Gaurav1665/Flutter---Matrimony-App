@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:board_datetime_picker/board_datetime_picker.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:matrimony_app/Model/userModel.dart';
 import 'package:matrimony_app/Provider/userProvider.dart';
@@ -11,19 +12,19 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 class AddUserScreen extends StatefulWidget {
-  final UserModel? user;
-  AddUserScreen({super.key, this.user});
+  final int? userId;
+  AddUserScreen({super.key, this.userId});
 
   @override
   State<AddUserScreen> createState() => _AddUserScreenState();
 }
 
 class _AddUserScreenState extends State<AddUserScreen> {
-  late TextEditingController _fullNameController;
-  late TextEditingController _emailController;
-  late TextEditingController _contactController;
-  late TextEditingController _passwordController;
-  late TextEditingController _confirmPasswordController;
+  TextEditingController? _fullNameController;
+  TextEditingController? _emailController;
+  TextEditingController? _contactController;
+  TextEditingController? _passwordController;
+  TextEditingController? _confirmPasswordController;
   final _formKey = GlobalKey<FormState>();
   DateTime? _selectedDOB;
   XFile? _pickedImage;
@@ -33,33 +34,81 @@ class _AddUserScreenState extends State<AddUserScreen> {
   final List<String> cities = ["Mumbai", "Delhi", "Bangalore", "Kolkata", "Chennai", "Hyderabad"];
   final List<String> hobbies = ["Reading", "Traveling", "Gaming", "Cooking", "Sports"];
   List<String> _selectedHobbies = [];
-  bool passwordVisible = false;
-  bool confirmPasswordVisible = false;
+  bool passwordVisible = true;
+  bool confirmPasswordVisible = true;
+  bool? _isFavorite;
 
   @override
   void initState() {
     super.initState();
-    if(widget.user != null){
-      _savedImagePath = widget.user!.userImage;
-      _pickedImage =XFile(widget.user!.userImage);
-      _fullNameController = TextEditingController(text: widget.user?.userFullName);
-      _emailController = TextEditingController(text: widget.user?.userEmail);
-      _contactController = TextEditingController(text: widget.user?.userContact);
-      _passwordController = TextEditingController(text: widget.user?.password);
-      _confirmPasswordController = TextEditingController(text: widget.user?.password);
-      _selectedCity = widget.user?.userCity;
-      _selectedGender = widget.user?.userGender;
-      _selectedDOB = widget.user != null ? DateTime.parse(widget.user!.userDOB) : null;
-      _selectedHobbies = widget.user?.userHobbies.split(" ") ?? [];
-    }
-    else{
-      _fullNameController = TextEditingController();
-      _emailController = TextEditingController();
-      _contactController = TextEditingController();
-      _passwordController = TextEditingController();
-      _confirmPasswordController = TextEditingController();
+    _initializeEmptyFields();
+    if (widget.userId != null) {
+      _loadUserData();
     }
   }
+
+  void _loadUserData() async {
+    try {
+      UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
+      UserModel user = await userProvider.fetchUserById(widget.userId!);
+      setState(() {
+        _savedImagePath = user.userImage;
+        _pickedImage = XFile(user.userImage);
+        _fullNameController = TextEditingController(text: user.userFullName);
+        _emailController = TextEditingController(text: user.userEmail);
+        _contactController = TextEditingController(text: user.userContact);
+        _passwordController = TextEditingController(text: user.password);
+        _confirmPasswordController = TextEditingController(text: user.password);
+        _selectedCity = user.userCity;
+        _selectedGender = user.userGender;
+        _selectedDOB = DateTime.parse(user.userDOB);
+        _selectedHobbies = user.userHobbies.split(" ");
+        _isFavorite = user.isFavorite;
+      });
+    } catch (e) {
+      // Handle error gracefully if the user is not found or any other issue occurs
+      Fluttertoast.showToast(msg: "Error loading user data: $e", backgroundColor: Colors.redAccent);
+    }
+  }
+
+  void _initializeEmptyFields() {
+    _fullNameController = TextEditingController();
+    _emailController = TextEditingController();
+    _contactController = TextEditingController();
+    _passwordController = TextEditingController();
+    _confirmPasswordController = TextEditingController();
+  }
+
+  void _clearFields(){
+    _savedImagePath = null;
+    _pickedImage = null;
+    _fullNameController!.clear();
+    _emailController!.clear();
+    _contactController!.clear();
+    _passwordController!.clear();
+    _confirmPasswordController!.clear();
+    _selectedCity = null;
+    _selectedGender = null;
+    _selectedDOB = null;
+    _selectedHobbies = [];
+  }
+
+
+  @override
+  void deactivate() {
+    // TODO: implement deactivate
+    super.deactivate();
+    _clearFields();
+  }
+
+  @override
+  void dispose(){
+    // TODO: implement dispose
+    super.dispose();
+    _clearFields();
+  }
+
+  
 
   Future<void> localImagePicker() async {
     final ImagePicker imagePicker = ImagePicker();
@@ -101,6 +150,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
 
   Future<void> _saveImageToFolder(XFile imageFile) async {
     final Directory appDir = await getApplicationDocumentsDirectory();
+    //asset
     final Directory imageDir = Directory('${appDir.path}/SavedImages/User/');
     if (!await imageDir.exists()) await imageDir.create(recursive: true);
     final String newImagePath = '${imageDir.path}${DateTime.now().millisecondsSinceEpoch}.jpg';
@@ -196,7 +246,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
     UserProvider userProvider = Provider.of<UserProvider>(context);
     Size size = MediaQuery.of(context).size;
     return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
         body: Padding(
           padding: const EdgeInsets.all(10),
@@ -228,11 +278,13 @@ class _AddUserScreenState extends State<AddUserScreen> {
                     key: _formKey,
                     child: Column(
                       children: [
-                        _CustomInputField(label: "Full Name", controller: _fullNameController,prefixIcon: Icon(Icons.person), inputType: TextInputType.name, validator: Validators.nameValidator),
+                        _CustomInputField(label: "Full Name", controller: _fullNameController!,prefixIcon: Icon(Icons.person), inputType: TextInputType.name, validator: Validators.nameValidator),
                         const SizedBox(height: 20),
-                        _CustomInputField(label: "Email", controller: _emailController,prefixIcon: Icon(Icons.email), inputType: TextInputType.emailAddress, validator: Validators.emailValidator),
+                        _CustomInputField(label: "Email", controller: _emailController!,prefixIcon: Icon(Icons.email), inputType: TextInputType.emailAddress, validator: Validators.emailValidator),
                         const SizedBox(height: 20),
-                        _CustomInputField(label: "Contact Number", controller: _contactController,prefixIcon: Icon(Icons.call), inputType: TextInputType.phone, validator: Validators.mobileNumberValidator),
+                        RepaintBoundary(
+                          child: _CustomInputField(label: "Contact Number", controller: _contactController!,prefixIcon: Icon(Icons.call), inputType: TextInputType.phone, validator: Validators.mobileNumberValidator),
+                        ),
                         const SizedBox(height: 20),
                         GestureDetector(
                           onTap: _showDatePicker,
@@ -355,54 +407,54 @@ class _AddUserScreenState extends State<AddUserScreen> {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        _CustomInputField(label: "Password", controller: _passwordController, obscureText: passwordVisible, prefixIcon: Icon(Icons.lock), suffixIcon: Icon(passwordVisible ? Icons.visibility_off : Icons.visibility), iconOnPress: () => setState(() => passwordVisible = !passwordVisible), validator: Validators.passwordValidator),
+                        _CustomInputField(label: "Password", controller: _passwordController!, obscureText: passwordVisible, prefixIcon: Icon(Icons.lock), suffixIcon: Icon(passwordVisible ? Icons.visibility_off : Icons.visibility), iconOnPress: () => setState(() => passwordVisible = !passwordVisible), validator: Validators.passwordValidator),
                         const SizedBox(height: 20),
-                        _CustomInputField(label: "Confirm Password", controller: _confirmPasswordController, obscureText: confirmPasswordVisible, prefixIcon: Icon(Icons.lock), suffixIcon: Icon(confirmPasswordVisible ? Icons.visibility_off : Icons.visibility), iconOnPress: () => setState(() => confirmPasswordVisible = !confirmPasswordVisible), validator: Validators.passwordValidator),
+                        _CustomInputField(label: "Confirm Password", controller: _confirmPasswordController!, obscureText: confirmPasswordVisible, prefixIcon: Icon(Icons.lock), suffixIcon: Icon(confirmPasswordVisible ? Icons.visibility_off : Icons.visibility), iconOnPress: () => setState(() => confirmPasswordVisible = !confirmPasswordVisible), validator: Validators.passwordValidator),
                         const SizedBox(height: 20),
                         ElevatedButton(
-                          child: Text(widget.user != null ? "Update User" : "Add User"),
+                          child: Text(widget.userId != null ? "Update User" : "Add User"),
                           onPressed: () async {
-                            if (_passwordController.text != _confirmPasswordController.text) {
-                              print("Password and Confirm Password do not match");
+                            if (_passwordController!.text != _confirmPasswordController!.text) {
+                              Fluttertoast.showToast(msg: "Password and Confirm Password do not match", backgroundColor: Colors.redAccent);
                             } else if (_pickedImage == null) {
-                              print("Please Select a Profile Picture");
+                              Fluttertoast.showToast(msg: "Please Select a Profile Picture", backgroundColor: Colors.redAccent);
                             } else if (_selectedCity == null) {
-                              print("Please select User's City");
+                              Fluttertoast.showToast(msg: "Please select User's City", backgroundColor: Colors.redAccent);
                             } else if (_selectedGender == null) {
-                              print("Please select User's Gender");
+                              Fluttertoast.showToast(msg: "Please select User's Gender", backgroundColor: Colors.redAccent);
                             } else if (_selectedHobbies.isEmpty) {
-                              print("Please select User's Hobbies");
+                              Fluttertoast.showToast(msg: "Please select User's Hobbies", backgroundColor: Colors.redAccent);
                             } else if (_formKey.currentState!.validate()) {
                               String hobbiesString = _selectedHobbies.join(" ");
-                              if (widget.user == null) {
+                              if (widget.userId == null) {
                                 await userProvider.addUser (user: UserModel(
-                                  userFullName: _fullNameController.text,
+                                  userFullName: _fullNameController!.text,
                                   userImage: _savedImagePath!,
-                                  userEmail: _emailController.text,
-                                  userContact: _contactController.text,
+                                  userEmail: _emailController!.text,
+                                  userContact: _contactController!.text,
                                   userCity: _selectedCity!,
                                   userGender: _selectedGender!,
                                   userDOB: _selectedDOB.toString(),
                                   userHobbies: hobbiesString,
-                                  password: _passwordController.text,
+                                  password: _passwordController!.text,
                                   isFavorite: false,
                                 ));
                                 Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => RootScreen()));
                               } else {
                                 await userProvider.updateUser (user: UserModel(
-                                  userId: widget.user!.userId,
-                                  userFullName: _fullNameController.text,
+                                  userId: widget.userId!,
+                                  userFullName: _fullNameController!.text,
                                   userImage: _savedImagePath!,
-                                  userEmail: _emailController.text,
-                                  userContact: _contactController.text,
+                                  userEmail: _emailController!.text,
+                                  userContact: _contactController!.text,
                                   userCity: _selectedCity!,
                                   userGender: _selectedGender!,
                                   userDOB: _selectedDOB.toString(),
                                   userHobbies: hobbiesString,
-                                  password: _passwordController.text,
-                                  isFavorite: widget.user!.isFavorite,
+                                  password: _passwordController!.text,
+                                  isFavorite: _isFavorite!,
                                 ));
-                                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => RootScreen()));
+                                Navigator.of(context).pop();
                               }
                             }
                           },

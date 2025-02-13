@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:matrimony_app/Model/userModel.dart';
 import 'package:matrimony_app/Provider/userProvider.dart';
-import 'package:matrimony_app/Screens/bottomNavigator.dart';
+import 'package:matrimony_app/Screens/addUser.dart';
 import 'package:provider/provider.dart';
 import 'package:slideable/slideable.dart';
 
@@ -128,7 +128,14 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => RootScreen(user: user)));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddUserScreen(userId: user.userId),
+                    ),
+                  ).then((_) {
+                    setState(() {});
+                  });
                 },
                 child: Text("Edit"),
               ),

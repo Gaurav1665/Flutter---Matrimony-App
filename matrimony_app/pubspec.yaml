@@ -45,6 +45,8 @@ dependencies:
   provider: ^6.1.2
   sqflite: ^2.4.1
   flutter_riverpod: ^2.6.1
+  google_fonts: ^6.2.1
+  fluttertoast: ^8.2.12
 
 dev_dependencies:
   flutter_test:
@@ -56,6 +58,11 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+  android: "ic_launcher"
+  image_path: "asset/logo/logo.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -72,7 +79,7 @@ flutter:
   assets:
     - asset/database/matrimony.db
     - asset/images/
-  #   - images/a_dot_ham.jpeg
+    - asset/logo/logo.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

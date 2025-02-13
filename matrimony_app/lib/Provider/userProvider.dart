@@ -85,6 +85,38 @@ class UserProvider with ChangeNotifier {
     }, where: 'userId = ?', whereArgs: [user.userId]);
   }
 
+  Future<UserModel> fetchUserById(int userId) async {
+    try {
+      Database db = await initDatabase();
+      List<Map<String, dynamic>> userMaps = await db.query('User', where: 'userId = ?', whereArgs: [userId]);
+
+      // Debugging logs
+      print('Fetched User for ID $userId: $userMaps');
+
+      if (userMaps.isNotEmpty) {
+        return UserModel(
+          userFullName: userMaps.first["userFullName"], 
+          userImage: userMaps.first["userImage"], 
+          userEmail: userMaps.first["userEmail"], 
+          userContact: userMaps.first["userContact"], 
+          userCity: userMaps.first["userCity"], 
+          userGender: userMaps.first["userGender"], 
+          userDOB: userMaps.first["userDOB"], 
+          userHobbies: userMaps.first["userHobbies"], 
+          password: userMaps.first["password"], 
+          isFavorite: userMaps.first["isFavorite"]==1 ? true : false
+        );
+      } else {
+        print('No user found for ID $userId');
+        throw Exception('User not found');
+      }
+    } catch (e) {
+      print('Error fetching user: $e');
+      throw Exception('Error fetching user: $e');  // Make sure to throw the error again after logging
+    }
+  }
+
+
   Future<File> getImageFileFromDocuments(String fileName) async {
     return File(fileName);
   }
