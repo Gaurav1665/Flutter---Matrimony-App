@@ -1,15 +1,17 @@
 import 'dart:io';
-import 'package:board_datetime_picker/board_datetime_picker.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter/src/material/date_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:matrimony_app/Model/userModel.dart';
 import 'package:matrimony_app/Provider/userProvider.dart';
 import 'package:matrimony_app/Screens/bottomNavigator.dart';
 import 'package:matrimony_app/Services/validator.dart';
+import 'package:matrimony_app/Widgets/customWidgets.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 class AddUserScreen extends StatefulWidget {
   final int? userId;
@@ -66,7 +68,6 @@ class _AddUserScreenState extends State<AddUserScreen> {
         _isFavorite = user.isFavorite;
       });
     } catch (e) {
-      // Handle error gracefully if the user is not found or any other issue occurs
       Fluttertoast.showToast(msg: "Error loading user data: $e", backgroundColor: Colors.redAccent);
     }
   }
@@ -150,7 +151,6 @@ class _AddUserScreenState extends State<AddUserScreen> {
 
   Future<void> _saveImageToFolder(XFile imageFile) async {
     final Directory appDir = await getApplicationDocumentsDirectory();
-    //asset
     final Directory imageDir = Directory('${appDir.path}/SavedImages/User/');
     if (!await imageDir.exists()) await imageDir.create(recursive: true);
     final String newImagePath = '${imageDir.path}${DateTime.now().millisecondsSinceEpoch}.jpg';
@@ -161,17 +161,21 @@ class _AddUserScreenState extends State<AddUserScreen> {
   }
 
   Future<void> _showDatePicker() async {
-    DateTime? pickedDate = await showBoardDateTimePicker(
-      context: context,
-      pickerType: DateTimePickerType.date,
-      initialDate: _selectedDOB ?? DateTime.now(),
-      maximumDate: DateTime(DateTime.now().year - 18),
-      minimumDate: DateTime(DateTime.now().year - 80),
-    );
-    if (pickedDate != null) setState(() => _selectedDOB = pickedDate);
-  }
+  DateTime? pickedDate = await showDatePicker(
+    context: context,
+    initialDate: _selectedDOB ?? DateTime(DateTime.now().year - 18),
+    firstDate: DateTime(DateTime.now().year - 80),
+    lastDate: DateTime(DateTime.now().year - 18)
+  );
 
-  void _showHobbiesDialog() {
+  if (pickedDate != null) {
+    setState(() {
+      _selectedDOB = pickedDate;
+    });
+  }
+}
+
+  void _showCustomHobbiesDialog() {
     showDialog(
       context: context,
       builder: (context) {
@@ -212,38 +216,10 @@ class _AddUserScreenState extends State<AddUserScreen> {
     );
   }
 
-  Widget _CustomInputField({
-    required String label,
-    required TextEditingController controller,
-    bool obscureText = false,
-    TextInputType? inputType,
-    Icon? suffixIcon,
-    Icon? prefixIcon,
-    VoidCallback? iconOnPress,
-    void Function(String)? onSubmitted,
-    FormFieldValidator<String>? validator,
-  }) {
-    return TextFormField(
-      obscureText: obscureText,
-      controller: controller,
-      textInputAction: TextInputAction.next,
-      keyboardType: inputType,
-      decoration: InputDecoration(
-        prefixIcon: prefixIcon != null ? IconButton(icon: prefixIcon, onPressed: iconOnPress) : null,
-        suffixIcon: suffixIcon != null ? IconButton(icon: suffixIcon, onPressed: iconOnPress) : null,
-        contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 15),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
-        labelText: label,
-        hintText: label,
-      ),
-      onFieldSubmitted: onSubmitted,
-      validator: validator,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     UserProvider userProvider = Provider.of<UserProvider>(context);
+    CustomWidgets cw = CustomWidgets();
     Size size = MediaQuery.of(context).size;
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
@@ -278,13 +254,11 @@ class _AddUserScreenState extends State<AddUserScreen> {
                     key: _formKey,
                     child: Column(
                       children: [
-                        _CustomInputField(label: "Full Name", controller: _fullNameController!,prefixIcon: Icon(Icons.person), inputType: TextInputType.name, validator: Validators.nameValidator),
+                        cw.CustomInputField(label: "Full Name", controller: _fullNameController!,prefixIcon: Icon(Icons.person), inputType: TextInputType.text, textCapitalization: TextCapitalization.words, validator: Validators.nameValidator),
                         const SizedBox(height: 20),
-                        _CustomInputField(label: "Email", controller: _emailController!,prefixIcon: Icon(Icons.email), inputType: TextInputType.emailAddress, validator: Validators.emailValidator),
+                        cw.CustomInputField(label: "Email", controller: _emailController!,prefixIcon: Icon(Icons.email), inputType: TextInputType.emailAddress, validator: Validators.emailValidator),
                         const SizedBox(height: 20),
-                        RepaintBoundary(
-                          child: _CustomInputField(label: "Contact Number", controller: _contactController!,prefixIcon: Icon(Icons.call), inputType: TextInputType.phone, validator: Validators.mobileNumberValidator),
-                        ),
+                        cw.CustomInputField(label: "Contact Number", controller: _contactController!,prefixIcon: Icon(Icons.call), inputType: TextInputType.phone, validator: Validators.mobileNumberValidator),
                         const SizedBox(height: 20),
                         GestureDetector(
                           onTap: _showDatePicker,
@@ -304,7 +278,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
                                   ],
                                 ),
                                 Text(
-                                  _selectedDOB != null ? "${_selectedDOB!.day}/${_selectedDOB!.month}/${_selectedDOB!.year}" : "Select Date",
+                                  _selectedDOB != null ? DateFormat('dd/MM/yyyy').format(_selectedDOB!) : "Select Date",
                                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: _selectedDOB != null ? Colors.black : Colors.grey.shade600),
                                 ),
                               ],
@@ -370,7 +344,6 @@ class _AddUserScreenState extends State<AddUserScreen> {
                                 children: [
                                   Image.asset("asset/images/gender-dark.png",width: 24, height: 24,),
                                   SizedBox(width: size.width*0.02),
-                                  //Text("♀♂", style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.grey.shade800)),
                                   Text("Gender", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.grey.shade800)),
                                 ],
                               ),
@@ -402,14 +375,14 @@ class _AddUserScreenState extends State<AddUserScreen> {
                                   Text("Hobbies", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.grey.shade800)),
                                 ],
                               ),
-                              IconButton(icon: const Icon(Icons.edit, color: Colors.grey), onPressed: _showHobbiesDialog),
+                              IconButton(icon: const Icon(Icons.edit, color: Colors.grey), onPressed: _showCustomHobbiesDialog),
                             ],
                           ),
                         ),
                         const SizedBox(height: 20),
-                        _CustomInputField(label: "Password", controller: _passwordController!, obscureText: passwordVisible, prefixIcon: Icon(Icons.lock), suffixIcon: Icon(passwordVisible ? Icons.visibility_off : Icons.visibility), iconOnPress: () => setState(() => passwordVisible = !passwordVisible), validator: Validators.passwordValidator),
+                        cw.CustomInputField(label: "Password", controller: _passwordController!, obscureText: passwordVisible, prefixIcon: Icon(Icons.lock), suffixIcon: Icon(passwordVisible ? Icons.visibility_off : Icons.visibility), iconOnPress: () => setState(() => passwordVisible = !passwordVisible), validator: Validators.passwordValidator),
                         const SizedBox(height: 20),
-                        _CustomInputField(label: "Confirm Password", controller: _confirmPasswordController!, obscureText: confirmPasswordVisible, prefixIcon: Icon(Icons.lock), suffixIcon: Icon(confirmPasswordVisible ? Icons.visibility_off : Icons.visibility), iconOnPress: () => setState(() => confirmPasswordVisible = !confirmPasswordVisible), validator: Validators.passwordValidator),
+                        cw.CustomInputField(label: "Confirm Password", controller: _confirmPasswordController!, obscureText: confirmPasswordVisible, prefixIcon: Icon(Icons.lock), suffixIcon: Icon(confirmPasswordVisible ? Icons.visibility_off : Icons.visibility), iconOnPress: () => setState(() => confirmPasswordVisible = !confirmPasswordVisible), validator: Validators.passwordValidator),
                         const SizedBox(height: 20),
                         ElevatedButton(
                           child: Text(widget.userId != null ? "Update User" : "Add User"),
@@ -454,7 +427,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
                                   password: _passwordController!.text,
                                   isFavorite: _isFavorite!,
                                 ));
-                                Navigator.of(context).pop();
+                                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => RootScreen()));
                               }
                             }
                           },

@@ -14,23 +14,36 @@ class FavoriteUserScreen extends StatefulWidget {
 
 class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
   TextEditingController search = TextEditingController();
-  Future<List<UserModel>>? searchedUser ;
+  Future<List<UserModel>>? searchedUser;
 
   @override
   void initState() {
     super.initState();
-    searchedUser  = getFavoriteUsers();
+    searchedUser = getFavoriteUsers();
   }
 
   Future<List<UserModel>> getFavoriteUsers() async {
     UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
-    List<UserModel> allUsers = await userProvider.fetchUser ();
+    List<UserModel> allUsers = await userProvider.fetchUser();
     return allUsers.where((user) => user.isFavorite).toList();
   }
 
-  void searchUser () {
+  // This method searches users based on full name, city, and email
+  Future<List<UserModel>> searchUser({String? searchText}) async {
+    List<UserModel> users = await getFavoriteUsers();
+    if (searchText == null || searchText.isEmpty) return users;
+
+    return users.where((user) =>
+      user.userFullName.toLowerCase().contains(searchText.toLowerCase()) ||
+      user.userCity.toLowerCase().contains(searchText.toLowerCase()) ||
+      user.userEmail.toLowerCase().contains(searchText.toLowerCase())
+    ).toList();
+  }
+
+  // Trigger the search when the text changes
+  void onSearchTextChanged(String value) {
     setState(() {
-      searchedUser  = Provider.of<UserProvider>(context, listen: false).searchUser (searchText: search.text);
+      searchedUser = searchUser(searchText: value);
     });
   }
 
@@ -38,15 +51,19 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: FutureBuilder<List<UserModel>>(
-        future: searchedUser ,
+        future: searchedUser,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) return Center(child: CircularProgressIndicator());
-          if (snapshot.hasError) return Center(child: Text("Error: ${snapshot.error}"));
-          if (!snapshot.hasData || snapshot.data!.isEmpty) return Center(child: Text("No Users Found"));
+          if (snapshot.connectionState == ConnectionState.waiting)
+            return Center(child: CircularProgressIndicator());
+          if (snapshot.hasError)
+            return Center(child: Text("Error: ${snapshot.error}"));
+          if (!snapshot.hasData || snapshot.data!.isEmpty)
+            return Center(child: Text("No Users Found"));
 
           List<UserModel> users = snapshot.data!;
           return Column(
             children: [
+              // Search field with a clear button
               TextFormField(
                 controller: search,
                 decoration: InputDecoration(
@@ -56,7 +73,7 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
                     onPressed: () {
                       search.clear();
                       setState(() {
-                        searchedUser  = getFavoriteUsers();
+                        searchedUser = getFavoriteUsers();
                       });
                     },
                   ),
@@ -64,7 +81,7 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
                   labelText: "Search User",
                 ),
-                onFieldSubmitted: (value) => searchUser (),
+                onChanged: onSearchTextChanged, // Trigger search on text change
               ),
               const SizedBox(height: 5),
               Expanded(
@@ -89,6 +106,7 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
     );
   }
 
+  // This function displays the user details in a slideable item
   Slideable _listItem({required BuildContext context, required UserModel user}) {
     int calculateAge(DateTime dob) {
       DateTime today = DateTime.now();
@@ -107,18 +125,17 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
           icon: Icon(user.isFavorite ? Icons.thumb_up : Icons.thumb_up_outlined, color: Colors.blue),
           onPress: () async {
             user.isFavorite = await userProvider.likebutton(userId: user.userId!, isFavorite: !user.isFavorite);
-            searchedUser = getFavoriteUsers();
             setState(() {
+              searchedUser = getFavoriteUsers(); // Refresh after favorite toggle
             });
           },
           backgroudColor: Colors.transparent,
         ),
       ],
       child: Card(
-        borderOnForeground: true,
         elevation: 3,
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 15,vertical: 5),
+          padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
           decoration: BoxDecoration(
             color: Colors.white,
             border: Border.all(width: 1, color: Color.fromARGB(124, 158, 158, 158)),
@@ -127,6 +144,7 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              // User's profile image
               Container(
                 height: 60,
                 width: 60,
@@ -137,17 +155,7 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(100),
-                  child: FutureBuilder<File>(
-                    future: userProvider.getImageFileFromDocuments(user.userImage),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting)
-                        return CircularProgressIndicator();
-                      if (snapshot.hasError) return Icon(Icons.error);
-                      return snapshot.hasData
-                          ? Image.file(snapshot.data!, fit: BoxFit.cover)
-                          : Icon(Icons.broken_image);
-                    },
-                  ),
+                  child: Image.file(File(user.userImage)),
                 ),
               ),
               const SizedBox(width: 15),
@@ -156,6 +164,7 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // User's full name and age
                     Row(
                       children: [
                         Icon(Icons.person, size: 25),
@@ -182,6 +191,7 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
                       ],
                     ),
                     const SizedBox(height: 5),
+                    // User's city
                     Row(
                       children: [
                         Icon(Icons.location_city, size: 25),
@@ -202,7 +212,7 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
             ],
           ),
         ),
-      )
+      ),
     );
   }
 }

@@ -115,17 +115,4 @@ class UserProvider with ChangeNotifier {
       throw Exception('Error fetching user: $e');  // Make sure to throw the error again after logging
     }
   }
-
-
-  Future<File> getImageFileFromDocuments(String fileName) async {
-    return File(fileName);
-  }
-
-  Future<List<UserModel>> searchUser ({String? searchText}) async {
-    List<UserModel> users = await fetchUser ();
-    if (searchText == null || searchText.isEmpty) return users;
-    return users.where((user) =>
-      user.userFullName.toLowerCase().contains(searchText.toLowerCase())
-    ).toList();
-  }
 }

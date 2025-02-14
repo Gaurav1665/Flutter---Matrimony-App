@@ -47,6 +47,7 @@ dependencies:
   flutter_riverpod: ^2.6.1
   google_fonts: ^6.2.1
   fluttertoast: ^8.2.12
+  shared_preferences: ^2.5.2
 
 dev_dependencies:
   flutter_test:
@@ -78,6 +79,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - asset/database/matrimony.db
+    - asset/images/login.png
     - asset/images/
     - asset/logo/logo.png
 

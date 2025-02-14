@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:matrimony_app/Screens/bottomNavigator.dart';
-import 'Provider/userProvider.dart';
+import 'package:matrimony_app/Screens/splashScreen.dart';  // Import the SplashScreen
 import 'package:provider/provider.dart';
+import 'Provider/userProvider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,9 +19,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        textTheme: GoogleFonts.robotoTextTheme()
+        textTheme: GoogleFonts.robotoTextTheme(),
       ),
-      home: RootScreen(),
+      home: SplashScreen(),  // Show SplashScreen first
       debugShowCheckedModeBanner: false,
     );
   }

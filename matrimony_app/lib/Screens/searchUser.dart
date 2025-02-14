@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:matrimony_app/Model/userModel.dart';
 import 'package:matrimony_app/Provider/userProvider.dart';
-import 'package:matrimony_app/Screens/addUser.dart';
+import 'package:matrimony_app/Screens/bottomNavigator.dart';
 import 'package:provider/provider.dart';
 import 'package:slideable/slideable.dart';
 
@@ -15,60 +15,77 @@ class SearchUserScreen extends StatefulWidget {
 
 class _SearchUserScreenState extends State<SearchUserScreen> {
   TextEditingController search = TextEditingController();
-  Future<List<UserModel>>? searchedUser ;
+  Future<List<UserModel>>? searchedUser;
 
   @override
   void initState() {
     super.initState();
-    searchedUser  = getList();
+    searchedUser = getList();
   }
 
   Future<List<UserModel>> getList() async {
-    return await Provider.of<UserProvider>(context, listen: false).fetchUser ();
+    return await Provider.of<UserProvider>(context, listen: false).fetchUser();
   }
 
-  void searchUser () {
+  Future<List<UserModel>> searchUser({String? searchText}) async {
+    UserProvider userProvider = Provider.of<UserProvider>(context, listen: false); // Using listen: false
+    List<UserModel> users = await userProvider.fetchUser();
+    if (searchText == null || searchText.isEmpty) return users;
+
+    return users.where((user) =>
+      user.userFullName.toLowerCase().contains(searchText.toLowerCase()) ||
+      user.userCity.toLowerCase().contains(searchText.toLowerCase()) ||
+      user.userEmail.toLowerCase().contains(searchText.toLowerCase())
+    ).toList();
+  }
+
+  void onSearchTextChanged(String value) {
     setState(() {
-      searchedUser  = Provider.of<UserProvider>(context, listen: false).searchUser (searchText: search.text);
+      searchedUser = searchUser(searchText: value);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<List<UserModel>>(
-        future: searchedUser ,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) return Center(child: CircularProgressIndicator());
-          if (snapshot.hasError) return Center(child: Text("Error: ${snapshot.error}"));
-          if (snapshot.data!.isEmpty) return Center(child: Text("No User Found"));
-
-          List<UserModel> users = snapshot.data!;
-          return Padding(
-            padding: EdgeInsets.all(10),
-            child: Column(
-              children: [
-                TextFormField(
-                  controller: search,
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.search),
-                    suffixIcon: IconButton(
-                      icon: Icon(Icons.clear),
-                      onPressed: () {
-                        search.clear();
-                        setState(() {
-                          searchedUser  = getList();
-                        });
-                      },
-                    ),
-                    contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 15),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
-                    labelText: "Search User",
-                  ),
-                  onFieldSubmitted: (value) => searchUser (),
+      body: Padding(
+        padding: EdgeInsets.all(10),
+        child: Column(
+          children: [
+            TextFormField(
+              controller: search,
+              decoration: InputDecoration(
+                prefixIcon: Icon(Icons.search),
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.clear),
+                  onPressed: () {
+                    search.clear();
+                    setState(() {
+                      searchedUser = getList();
+                    });
+                  },
                 ),
-                const SizedBox(height: 5),
-                Expanded(
+                contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 15),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+                labelText: "Search User",
+              ),
+              onChanged: onSearchTextChanged,
+            ),
+            const SizedBox(height: 5),
+            FutureBuilder<List<UserModel>>(
+              future: searchedUser,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting)
+                  return Center(child: CircularProgressIndicator());
+
+                if (snapshot.hasError)
+                  return Center(child: Text("Error: ${snapshot.error}"));
+
+                if (snapshot.data == null || snapshot.data!.isEmpty)
+                  return Expanded(child: Center(child: Text("No User Found")));
+
+                List<UserModel> users = snapshot.data!;
+                return Expanded(
                   child: ListView.builder(
                     itemCount: users.length,
                     itemBuilder: (context, index) {
@@ -85,11 +102,11 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
                       );
                     },
                   ),
-                ),
-              ],
-            ),
-          );
-        },
+                );
+              }
+            )
+          ],
+        ),
       ),
     );
   }
@@ -109,11 +126,11 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                height: size.width*0.3,
-                width: size.width*0.3,
+                height: size.width * 0.3,
+                width: size.width * 0.3,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(100),
-                  child: Image.file(File(user.userImage), fit: BoxFit.cover),                
+                  child: Image.file(File(user.userImage), fit: BoxFit.cover),
                 ),
               ),
               SizedBox(height: 10),
@@ -128,14 +145,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AddUserScreen(userId: user.userId),
-                    ),
-                  ).then((_) {
-                    setState(() {});
-                  });
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => RootScreen(userId: user.userId!,),),);
                 },
                 child: Text("Edit"),
               ),
@@ -160,7 +170,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
               color: Colors.blueGrey[700],
             ),
           ),
-          SizedBox(width: 10,),
+          SizedBox(width: 10),
           Expanded(
             child: Text(
               value,
@@ -187,8 +197,9 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
       return age;
     }
 
-    UserProvider userProvider = Provider.of<UserProvider>(context);
+    UserProvider userProvider = Provider.of<UserProvider>(context, listen: false); // Using listen: false
     return Slideable(
+
       items: <ActionItems>[
         ActionItems(
           icon: Icon(user.isFavorite ? Icons.thumb_up : Icons.thumb_up_outlined, color: Colors.blue),
@@ -201,8 +212,8 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
         ActionItems(
           icon: Icon(Icons.delete, color: Colors.red),
           onPress: () async {
-            await userProvider.deleteUser (user.userId!);
-            searchUser ();
+            await userProvider.deleteUser(user.userId!);
+            onSearchTextChanged(search.text);
             setState(() {});
           },
           backgroudColor: Colors.transparent,
@@ -211,7 +222,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
       child: Card(
         elevation: 3,
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 15,vertical: 5),
+          padding: EdgeInsets.symmetric(horizontal: 10,vertical: 5),
           decoration: BoxDecoration(
             color: Colors.white,
             border: Border.all(width: 1, color: Color.fromARGB(124, 158, 158, 158)),
@@ -230,20 +241,10 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(100),
-                  child: FutureBuilder<File>(
-                    future: userProvider.getImageFileFromDocuments(user.userImage),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting)
-                        return CircularProgressIndicator();
-                      if (snapshot.hasError) return Icon(Icons.error);
-                      return snapshot.hasData
-                          ? Image.file(snapshot.data!, fit: BoxFit.cover)
-                          : Icon(Icons.broken_image);
-                    },
-                  ),
+                  child: Image.file(File(user.userImage), fit: BoxFit.cover),
                 ),
               ),
-              const SizedBox(width: 15),
+              const SizedBox(width: 5),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -261,9 +262,9 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
                             color: Colors.black,
                           ),
                         ),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: 5),
                         Text(" | "),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: 5),
                         Text(
                           "${calculateAge(DateTime.parse(user.userDOB))} years old",
                           style: const TextStyle(
@@ -295,7 +296,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
             ],
           ),
         ),
-      )
+      ),
     );
   }
 }

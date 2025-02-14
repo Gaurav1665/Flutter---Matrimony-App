@@ -6,9 +6,12 @@ import 'package:matrimony_app/Screens/aboutUs.dart';
 import 'package:matrimony_app/Screens/addUser.dart';
 import 'package:matrimony_app/Screens/favoriteUsers.dart';
 import 'package:matrimony_app/Screens/searchUser.dart';
+import 'package:matrimony_app/Screens/splashScreen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RootScreen extends StatefulWidget {
-  const RootScreen({super.key});
+  int? userId;
+  RootScreen({super.key, this.userId});
 
   @override
   State<RootScreen> createState() => _RootScreenState();
@@ -24,17 +27,18 @@ class _RootScreenState extends State<RootScreen> {
     super.initState();
     screen = [
       const SearchUserScreen(),
-      AddUserScreen(), // Keep this as a separate screen for the PageView
+      AddUserScreen(userId: widget.userId,),
       const FavoriteUserScreen(),
-      const AboutUsScreen(),
+      const AboutUsScreen()
     ];
+    currentScreen = widget.userId!=null ? 1 : 0;
     controller = PageController(initialPage: currentScreen);
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => false,
+    return PopScope(
+      canPop: false,
       child: Scaffold(
         backgroundColor: Colors.amber,
         appBar: AppBar(
@@ -42,6 +46,15 @@ class _RootScreenState extends State<RootScreen> {
             "MATRIFY",
             style: GoogleFonts.nunito(fontWeight: FontWeight.bold, letterSpacing: 3),
           ),
+          actions: [
+            IconButton(onPressed: () async {
+              final prefs = await SharedPreferences.getInstance();
+              prefs.setBool('isLoggedIn', false);
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => SplashScreen()),
+              );
+            }, icon: Icon(Icons.login))
+          ],
           automaticallyImplyLeading: false,
         ),
         resizeToAvoidBottomInset: true,
