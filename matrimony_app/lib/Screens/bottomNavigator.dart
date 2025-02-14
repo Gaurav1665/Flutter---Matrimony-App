@@ -48,10 +48,32 @@ class _RootScreenState extends State<RootScreen> {
           ),
           actions: [
             IconButton(onPressed: () async {
-              final prefs = await SharedPreferences.getInstance();
-              prefs.setBool('isLoggedIn', false);
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => SplashScreen()),
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text("Warning"),
+                    content: Text("Are you sure you want to Logout?"),
+                    actions: [
+                      ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Text("No")
+                      ),
+                      ElevatedButton(
+                          onPressed: () async{
+                            final prefs = await SharedPreferences.getInstance();
+                            prefs.setBool('isLoggedIn', false);
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(builder: (context) => SplashScreen()),
+                            );
+                          },
+                          child: Text("Yes")
+                      ),
+                    ],
+                  );
+                },
               );
             }, icon: Icon(Icons.login))
           ],

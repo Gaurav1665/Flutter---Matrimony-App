@@ -212,9 +212,32 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
         ActionItems(
           icon: Icon(Icons.delete, color: Colors.red),
           onPress: () async {
-            await userProvider.deleteUser(user.userId!);
-            onSearchTextChanged(search.text);
-            setState(() {});
+            showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text("Warning"),
+                  content: Text("Are you sure you want to delete this user?"),
+                  actions: [
+                    ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Text("No")
+                    ),
+                    ElevatedButton(
+                        onPressed: () async{
+                          await userProvider.deleteUser(user.userId!);
+                          onSearchTextChanged(search.text);
+                          setState(() {});
+                          Navigator.of(context).pop();
+                        },
+                        child: Text("Yes")
+                    ),
+                  ],
+                );
+              },
+            );
           },
           backgroudColor: Colors.transparent,
         ),

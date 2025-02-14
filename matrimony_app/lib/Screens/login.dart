@@ -77,6 +77,7 @@ class _LoginState extends State<Login> {
           FocusScope.of(context).unfocus();
         },
         child: Scaffold(
+          backgroundColor: Colors.white,
           appBar: AppBar(
             title: Text("Log in",style: TextStyle(fontSize: 15,color: Colors.grey),),
             automaticallyImplyLeading: false,
@@ -88,9 +89,9 @@ class _LoginState extends State<Login> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset("assets/images/logo.png",height: 175,),
+                    Image.asset("asset/images/login.png",height: 175,),
                     const SizedBox(height: 16,),
-                    Text("Welcome Back",style: TextStyle(fontSize: 25),),
+                    Text("Welcome To Matrify",style: TextStyle(fontSize: 25),),
                     const SizedBox(
                       height: 20,
                     ),

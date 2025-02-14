@@ -28,7 +28,6 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
     return allUsers.where((user) => user.isFavorite).toList();
   }
 
-  // This method searches users based on full name, city, and email
   Future<List<UserModel>> searchUser({String? searchText}) async {
     List<UserModel> users = await getFavoriteUsers();
     if (searchText == null || searchText.isEmpty) return users;
@@ -40,7 +39,6 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
     ).toList();
   }
 
-  // Trigger the search when the text changes
   void onSearchTextChanged(String value) {
     setState(() {
       searchedUser = searchUser(searchText: value);
@@ -50,61 +48,70 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<List<UserModel>>(
-        future: searchedUser,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting)
-            return Center(child: CircularProgressIndicator());
-          if (snapshot.hasError)
-            return Center(child: Text("Error: ${snapshot.error}"));
-          if (!snapshot.hasData || snapshot.data!.isEmpty)
-            return Center(child: Text("No Users Found"));
-
-          List<UserModel> users = snapshot.data!;
-          return Column(
-            children: [
-              // Search field with a clear button
-              TextFormField(
-                controller: search,
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.search),
-                  suffixIcon: IconButton(
-                    icon: Icon(Icons.clear),
-                    onPressed: () {
-                      search.clear();
-                      setState(() {
-                        searchedUser = getFavoriteUsers();
-                      });
-                    },
-                  ),
-                  contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 15),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
-                  labelText: "Search User",
-                ),
-                onChanged: onSearchTextChanged, // Trigger search on text change
-              ),
-              const SizedBox(height: 5),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: users.length,
-                  itemBuilder: (context, index) {
-                    UserModel _user = users[index];
-                    return Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      child: GestureDetector(
-                        onLongPressDown: (val) {},
-                        child: _listItem(context: context, user: _user),
-                      ),
-                    );
+      body: Padding(
+        padding: EdgeInsets.all(10),
+        child: Column(
+          children: [
+            TextFormField(
+              controller: search,
+              decoration: InputDecoration(
+                prefixIcon: Icon(Icons.search),
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.clear),
+                  onPressed: () {
+                    search.clear();
+                    setState(() {
+                      searchedUser = getFavoriteUsers();
+                    });
                   },
                 ),
+                contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 15),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+                labelText: "Search User",
               ),
-            ],
-          );
-        },
-      ),
+              onChanged: onSearchTextChanged, // Trigger search on text change
+            ),
+            const SizedBox(height: 5),
+            FutureBuilder<List<UserModel>>(
+              future: searchedUser,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting)
+                  return Center(child: CircularProgressIndicator());
+                if (snapshot.hasError)
+                  return Center(child: Text("Error: ${snapshot.error}"));
+                if (!snapshot.hasData || snapshot.data!.isEmpty)
+                  return Center(child: Text("No Users Found"));
+
+                List<UserModel> users = snapshot.data!;
+                return Column(
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                      itemCount: users.length,
+                        itemBuilder: (context, index) {
+                          UserModel _user = users[index];
+                          return Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            child: GestureDetector(
+                              onLongPressDown: (val) {},
+                              child: _listItem(context: context, user: _user),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    Text("slide left to like or delete user")
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      )
     );
   }
+
+
 
   // This function displays the user details in a slideable item
   Slideable _listItem({required BuildContext context, required UserModel user}) {
