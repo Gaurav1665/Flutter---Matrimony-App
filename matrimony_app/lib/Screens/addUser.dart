@@ -258,7 +258,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
                         const SizedBox(height: 20),
                         cw.CustomInputField(label: "Email", controller: _emailController!,prefixIcon: Icon(Icons.email), inputType: TextInputType.emailAddress, validator: Validators.emailValidator),
                         const SizedBox(height: 20),
-                        cw.CustomInputField(label: "Contact Number", controller: _contactController!,prefixIcon: Icon(Icons.call), inputType: TextInputType.phone, validator: Validators.mobileNumberValidator),
+                        cw.CustomInputField(label: "Contact Number", controller: _contactController!,prefixIcon: Icon(Icons.call), inputType: TextInputType.numberWithOptions(decimal: true, signed: false), maxlen: 10, validator: Validators.mobileNumberValidator),
                         const SizedBox(height: 20),
                         GestureDetector(
                           onTap: _showDatePicker,

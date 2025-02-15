@@ -289,7 +289,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
                         Text(" | "),
                         const SizedBox(width: 5),
                         Text(
-                          "${calculateAge(DateTime.parse(user.userDOB))} years old",
+                          "${calculateAge(DateTime.parse(user.userDOB))}",
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,

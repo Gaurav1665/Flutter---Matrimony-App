@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CustomWidgets{
 
@@ -6,6 +7,7 @@ class CustomWidgets{
     required String label,
     required TextEditingController controller,
     bool obscureText = false,
+    int? maxlen,
     TextInputType? inputType,
     TextCapitalization? textCapitalization,
     Icon? suffixIcon,
@@ -18,6 +20,7 @@ class CustomWidgets{
       obscureText: obscureText,
       textCapitalization: textCapitalization ?? TextCapitalization.none,
       controller: controller,
+      maxLength: maxlen,
       keyboardType: inputType,
       decoration: InputDecoration(
         prefixIcon: prefixIcon != null ? IconButton(icon: prefixIcon, onPressed: iconOnPress) : null,
@@ -26,6 +29,7 @@ class CustomWidgets{
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
         labelText: label,
         hintText: label,
+        counterText: ""
       ),
       onFieldSubmitted: onSubmitted,
       validator: validator,
