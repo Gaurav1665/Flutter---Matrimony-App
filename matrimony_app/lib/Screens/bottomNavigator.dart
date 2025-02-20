@@ -1,5 +1,4 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:matrimony_app/Screens/aboutUs.dart';
@@ -37,14 +36,14 @@ class _RootScreenState extends State<RootScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return PopScope(
       canPop: false,
       child: Scaffold(
-        backgroundColor: Colors.amber,
         appBar: AppBar(
           title: Text(
             "MATRIFY",
-            style: GoogleFonts.nunito(fontWeight: FontWeight.bold, letterSpacing: 3),
+            style: GoogleFonts.nunito(fontWeight: FontWeight.bold, letterSpacing: 3, color: Color(0xffF5F5F5)),
           ),
           actions: [
             IconButton(onPressed: () async {
@@ -75,7 +74,7 @@ class _RootScreenState extends State<RootScreen> {
                   );
                 },
               );
-            }, icon: Icon(Icons.login))
+            }, icon: Icon(Icons.login, color: Color(0xffF5F5F5),))
           ],
           automaticallyImplyLeading: false,
         ),
@@ -86,13 +85,16 @@ class _RootScreenState extends State<RootScreen> {
           physics: const NeverScrollableScrollPhysics(),
         ),
         bottomNavigationBar: CurvedNavigationBar(
-          animationDuration: Duration(milliseconds: 300),
+          backgroundColor: Color(0xffF4F4F4),
+          buttonBackgroundColor: Color(0xff003366),
+          color: Color(0xff003366),
+          animationDuration: Duration(milliseconds: 400),
           index: currentScreen,
           items: <Widget>[
-            Icon(Icons.search),
-            Icon(Icons.add),
-            Icon(Icons.favorite),
-            Icon(CupertinoIcons.exclamationmark),
+            Icon(Icons.search, color: Color(0xffF4F4F4)),
+            Icon(Icons.add, color: Color(0xffF4F4F4)),
+            Icon(Icons.favorite, color: Color(0xffF4F4F4)),
+            Icon(Icons.info_outline, color: Color(0xffF4F4F4)),
           ],
           onTap: (index) {
             setState(() {

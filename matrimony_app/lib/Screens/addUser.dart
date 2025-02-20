@@ -9,6 +9,7 @@ import 'package:matrimony_app/Provider/userProvider.dart';
 import 'package:matrimony_app/Screens/bottomNavigator.dart';
 import 'package:matrimony_app/Services/validator.dart';
 import 'package:matrimony_app/Widgets/customWidgets.dart';
+import 'package:matrimony_app/Widgets/imgPickerWidget.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -229,7 +230,18 @@ class _AddUserScreenState extends State<AddUserScreen> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                SizedBox(
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(color: Color.fromARGB(255, 112, 112, 112), width: 2),
+                    boxShadow: [
+                      BoxShadow(
+                        blurRadius: 5,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
                   height: size.width * 0.4,
                   width: size.width * 0.4,
                   child: _savedImagePath != null
@@ -254,11 +266,31 @@ class _AddUserScreenState extends State<AddUserScreen> {
                     key: _formKey,
                     child: Column(
                       children: [
-                        cw.CustomInputField(label: "Full Name", controller: _fullNameController!,prefixIcon: Icon(Icons.person), inputType: TextInputType.text, textCapitalization: TextCapitalization.words, validator: Validators.nameValidator),
+                        cw.CustomInputField(
+                          label: "Full Name", 
+                          controller: _fullNameController!,
+                          prefixIcon: Icon(Icons.person), 
+                          inputType: TextInputType.text, 
+                          textCapitalization: TextCapitalization.words, 
+                          validator: Validators.nameValidator,
+                        ),
                         const SizedBox(height: 20),
-                        cw.CustomInputField(label: "Email", controller: _emailController!,prefixIcon: Icon(Icons.email), inputType: TextInputType.emailAddress, validator: Validators.emailValidator),
+                        cw.CustomInputField(
+                          label: "Email", 
+                          controller: _emailController!,
+                          prefixIcon: Icon(Icons.email), 
+                          inputType: TextInputType.emailAddress, 
+                          validator: Validators.emailValidator
+                        ),
                         const SizedBox(height: 20),
-                        cw.CustomInputField(label: "Contact Number", controller: _contactController!,prefixIcon: Icon(Icons.call), inputType: TextInputType.numberWithOptions(decimal: true, signed: false), maxlen: 10, validator: Validators.mobileNumberValidator),
+                        cw.CustomInputField(
+                          label: "Contact Number", 
+                          controller: _contactController!,
+                          prefixIcon: Icon(Icons.call), 
+                          inputType: TextInputType.numberWithOptions(decimal: true, signed: false), 
+                          maxlen: 10, 
+                          validator: Validators.mobileNumberValidator
+                        ),
                         const SizedBox(height: 20),
                         GestureDetector(
                           onTap: _showDatePicker,

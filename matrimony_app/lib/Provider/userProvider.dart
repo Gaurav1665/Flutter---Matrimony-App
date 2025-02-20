@@ -111,7 +111,7 @@ class UserProvider with ChangeNotifier {
       }
     } catch (e) {
       print('Error fetching user: $e');
-      throw Exception('Error fetching user: $e');  // Make sure to throw the error again after logging
+      throw Exception('Error fetching user: $e');
     }
   }
 }

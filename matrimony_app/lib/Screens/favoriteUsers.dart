@@ -25,7 +25,9 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
   Future<List<UserModel>> getFavoriteUsers() async {
     UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
     List<UserModel> allUsers = await userProvider.fetchUser();
-    return allUsers.where((user) => user.isFavorite).toList();
+    List<UserModel> favorite = allUsers.where((user) => user.isFavorite).toList();
+    print(favorite.toList());
+    return favorite;
   }
 
   Future<List<UserModel>> searchUser({String? searchText}) async {
@@ -69,7 +71,7 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
                 labelText: "Search User",
               ),
-              onChanged: onSearchTextChanged, // Trigger search on text change
+              onChanged: onSearchTextChanged,
             ),
             const SizedBox(height: 5),
             FutureBuilder<List<UserModel>>(
@@ -77,43 +79,41 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting)
                   return Center(child: CircularProgressIndicator());
+
                 if (snapshot.hasError)
                   return Center(child: Text("Error: ${snapshot.error}"));
-                if (!snapshot.hasData || snapshot.data!.isEmpty)
-                  return Center(child: Text("No Users Found"));
+
+                if (snapshot.data == null || snapshot.data!.isEmpty)
+                  return Expanded(child: Center(child: Text("No User Found")));
 
                 List<UserModel> users = snapshot.data!;
-                return Column(
-                  children: [
-                    Expanded(
-                      child: ListView.builder(
-                      itemCount: users.length,
-                        itemBuilder: (context, index) {
-                          UserModel _user = users[index];
-                          return Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                            child: GestureDetector(
-                              onLongPressDown: (val) {},
-                              child: _listItem(context: context, user: _user),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    Text("slide left to like or delete user")
-                  ],
+                return Expanded(
+                  child: ListView.builder(
+                    itemCount: users.length,
+                    itemBuilder: (context, index) {
+                      UserModel _user = users[index];
+                      return Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        child: GestureDetector(
+                          onLongPressDown: (val) => setState(() {}),
+                          child: _listItem(context: context, user: _user),
+                        ),
+                      );
+                    },
+                  ),
                 );
-              },
+              }
             ),
+            const SizedBox(height: 5),
+            Center(child: Text("Note: swipe left to like or dislike user",style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic)),)
           ],
         ),
-      )
+      ),
     );
   }
 
 
 
-  // This function displays the user details in a slideable item
   Slideable _listItem({required BuildContext context, required UserModel user}) {
     int calculateAge(DateTime dob) {
       DateTime today = DateTime.now();
@@ -133,7 +133,7 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
           onPress: () async {
             user.isFavorite = await userProvider.likebutton(userId: user.userId!, isFavorite: !user.isFavorite);
             setState(() {
-              searchedUser = getFavoriteUsers(); // Refresh after favorite toggle
+              searchedUser = getFavoriteUsers();
             });
           },
           backgroudColor: Colors.transparent,
@@ -151,7 +151,6 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // User's profile image
               Container(
                 height: 60,
                 width: 60,
@@ -171,7 +170,6 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // User's full name and age
                     Row(
                       children: [
                         Icon(Icons.person, size: 25),
@@ -188,7 +186,7 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
                         Text(" | "),
                         const SizedBox(width: 10),
                         Text(
-                          "${calculateAge(DateTime.parse(user.userDOB))} years old",
+                          "${calculateAge(DateTime.parse(user.userDOB))}",
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -198,7 +196,6 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
                       ],
                     ),
                     const SizedBox(height: 5),
-                    // User's city
                     Row(
                       children: [
                         Icon(Icons.location_city, size: 25),

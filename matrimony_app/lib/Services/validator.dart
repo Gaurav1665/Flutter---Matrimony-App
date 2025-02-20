@@ -20,6 +20,7 @@ class Validators {
 
   static String? mobileNumberValidator(String? number) {
     if (number == null || number.trim().isEmpty) return 'Please enter your mobile number';
+    if (number.contains(".") || number.contains(",")) return 'Please enter valid mobile number';
     if (!RegExp(r"^\+?[0-9]{10,15}$").hasMatch(number)) return 'Enter a valid 10-digit mobile number';
     return null;
   }

@@ -104,7 +104,9 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
                   ),
                 );
               }
-            )
+            ),
+            const SizedBox(height: 5),
+            Center(child: Text("Note: swipe left to like or delete user",style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic)),)
           ],
         ),
       ),
