@@ -65,6 +65,13 @@ class MyApp extends StatelessWidget {
             color: Color(0xffB0B0B0)
           )
         ),
+        cardTheme: CardTheme(
+          shape: RoundedRectangleBorder(
+            borderRadius: const BorderRadius.all(
+              Radius.circular(20.0),
+            ),
+          ),
+        ),
       ),
       home: SplashScreen(),
       debugShowCheckedModeBanner: false,

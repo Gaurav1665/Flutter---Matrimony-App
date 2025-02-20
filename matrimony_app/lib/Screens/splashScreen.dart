@@ -7,7 +7,7 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    Future.delayed(Duration(seconds: 3), () async {
+    Future.delayed(Duration(seconds: 1), () async {
       final prefs = await SharedPreferences.getInstance();
       final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
       if (isLoggedIn) {
@@ -33,7 +33,7 @@ class SplashScreen extends StatelessWidget {
             ),
             SizedBox(height: 20),
             CircularProgressIndicator(
-              color: Colors.white,
+              color: Color(0xff003366),
             ),
           ],
         ),

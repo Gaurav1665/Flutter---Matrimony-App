@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:matrimony_app/Screens/bottomNavigator.dart';
 import 'package:matrimony_app/Services/validator.dart';
 import 'package:matrimony_app/Widgets/customWidgets.dart';
@@ -79,9 +80,8 @@ class _LoginState extends State<Login> {
         child: Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
-            title: Text("Log in",style: TextStyle(fontSize: 15,color: Colors.grey),),
+            title: Text("Log in",style: GoogleFonts.nunito(fontWeight: FontWeight.bold, letterSpacing: 3, color: Color(0xffF5F5F5))),
             automaticallyImplyLeading: false,
-            backgroundColor: Colors.transparent,
           ),
           body: Padding(
               padding: const EdgeInsets.all(8.0),
