@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/src/material/date_picker.dart';
 import 'package:image_picker/image_picker.dart';
@@ -270,9 +271,12 @@ class _AddUserScreenState extends State<AddUserScreen> {
                           label: "Full Name", 
                           controller: _fullNameController!,
                           prefixIcon: Icon(Icons.person), 
-                          inputType: TextInputType.text, 
+                          inputType: TextInputType.name,
                           textCapitalization: TextCapitalization.words, 
                           validator: Validators.nameValidator,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(RegExp('[a-zA-Z ]')),
+                          ]
                         ),
                         const SizedBox(height: 20),
                         cw.CustomInputField(
@@ -289,7 +293,10 @@ class _AddUserScreenState extends State<AddUserScreen> {
                           prefixIcon: Icon(Icons.call), 
                           inputType: TextInputType.numberWithOptions(decimal: true, signed: false), 
                           maxlen: 10, 
-                          validator: Validators.mobileNumberValidator
+                          validator: Validators.mobileNumberValidator,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(RegExp('[0-9]')),
+                          ]
                         ),
                         const SizedBox(height: 20),
                         GestureDetector(

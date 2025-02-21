@@ -16,6 +16,7 @@ class SearchUserScreen extends StatefulWidget {
 class _SearchUserScreenState extends State<SearchUserScreen> {
   TextEditingController search = TextEditingController();
   Future<List<UserModel>>? searchedUser;
+  bool isSorted = false;
 
   @override
   void initState() {
@@ -52,24 +53,34 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
         padding: EdgeInsets.all(10),
         child: Column(
           children: [
-            TextFormField(
-              controller: search,
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.search),
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.clear),
-                  onPressed: () {
-                    search.clear();
-                    setState(() {
-                      searchedUser = getList();
-                    });
-                  },
-                ),
-                contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 15),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
-                labelText: "Search User",
-              ),
-              onChanged: onSearchTextChanged,
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Expanded(child: TextFormField(
+                  controller: search,
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.search),
+                    suffixIcon: IconButton(
+                      icon: Icon(Icons.clear),
+                      onPressed: () {
+                        search.clear();
+                        setState(() {
+                          searchedUser = getList();
+                        });
+                      },
+                    ),
+                    contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 15),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+                    labelText: "Search User",
+                  ),
+                  onChanged: onSearchTextChanged,
+                ),),
+                IconButton(onPressed: () {
+                  setState(() {
+                    isSorted = !isSorted;
+                  });
+                }, icon: Icon(Icons.sort_by_alpha))
+              ],
             ),
             const SizedBox(height: 5),
             FutureBuilder<List<UserModel>>(
@@ -84,7 +95,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
                 if (snapshot.data == null || snapshot.data!.isEmpty)
                   return Expanded(child: Center(child: Text("No User Found")));
 
-                List<UserModel> users = snapshot.data!;
+                List<UserModel> users = isSorted ? snapshot.data! : snapshot.data!.reversed.toList();
                 return Expanded(
                   child: ListView.builder(
                     itemCount: users.length,

@@ -15,7 +15,7 @@ class CustomWidgets{
     VoidCallback? iconOnPress,
     void Function(String)? onSubmitted,
     FormFieldValidator<String>? validator,
-    ValueChanged<String>? onChange
+    List<TextInputFormatter>? inputFormatters
   }) {
     return TextFormField(
       obscureText: obscureText,
@@ -46,7 +46,7 @@ class CustomWidgets{
       style: TextStyle(color: Color(0xff2C2C2C)),
       onFieldSubmitted: onSubmitted,
       validator: validator,
-      onChanged: onChange,
+      inputFormatters: inputFormatters,
     );
   }
   

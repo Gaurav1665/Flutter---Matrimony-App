@@ -115,6 +115,7 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
 
 
   Slideable _listItem({required BuildContext context, required UserModel user}) {
+
     int calculateAge(DateTime dob) {
       DateTime today = DateTime.now();
       int age = today.year - dob.year;
@@ -126,6 +127,8 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
     }
 
     UserProvider userProvider = Provider.of<UserProvider>(context);
+    Size size = MediaQuery.of(context).size;
+
     return Slideable(
       items: <ActionItems>[
         ActionItems(
@@ -140,40 +143,55 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
         ),
       ],
       child: Card(
-        elevation: 3,
+        elevation: 4,
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+          height: size.height*0.13,
+          padding: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
           decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(width: 1, color: Color.fromARGB(124, 158, 158, 158)),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(25),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                height: 60,
-                width: 60,
+                height: size.height*0.1,
+                width: size.height*0.1,
                 decoration: BoxDecoration(
-                  color: Colors.grey[350],
-                  shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(15),
                   border: Border.all(width: 1, color: Colors.white),
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(100),
-                  child: Image.file(File(user.userImage)),
+                  borderRadius: BorderRadius.circular(15),
+                  child: Image.file(File(user.userImage), fit: BoxFit.cover),
                 ),
               ),
-              const SizedBox(width: 15),
+              const SizedBox(width: 5),
               Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Row(
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.person, size: 25),
                         const SizedBox(width: 8),
+                        Text(
+                          user.userGender=="Male" ? "♂" : "♀",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(Icons.location_city, size: 25),
+                      ],
+                    ),
+                    const SizedBox(width: 5),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Text(
                           user.userFullName,
                           style: const TextStyle(
@@ -182,23 +200,29 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
                             color: Colors.black,
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        Text(" | "),
-                        const SizedBox(width: 10),
-                        Text(
-                          "${calculateAge(DateTime.parse(user.userDOB))}",
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.grey,
-                          ),
+                        Row(
+                          children: [
+                            Text(
+                              user.userGender,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                            Text(" | "),
+                            const SizedBox(width: 5),
+                            Text(
+                              "${calculateAge(DateTime.parse(user.userDOB))} years old",
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 5),
-                    Row(
-                      children: [
-                        Icon(Icons.location_city, size: 25),
                         const SizedBox(width: 8),
                         Text(
                           user.userCity,
