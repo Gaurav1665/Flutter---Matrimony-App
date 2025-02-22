@@ -10,7 +10,6 @@ import 'package:matrimony_app/Provider/userProvider.dart';
 import 'package:matrimony_app/Screens/bottomNavigator.dart';
 import 'package:matrimony_app/Services/validator.dart';
 import 'package:matrimony_app/Widgets/customWidgets.dart';
-import 'package:matrimony_app/Widgets/imgPickerWidget.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -245,22 +244,15 @@ class _AddUserScreenState extends State<AddUserScreen> {
                   ),
                   height: size.width * 0.4,
                   width: size.width * 0.4,
-                  child: _savedImagePath != null
-                      ? GestureDetector(
-                          onTap: localImagePicker,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20.0),
-                            child: Image.file(File(_savedImagePath!), fit: BoxFit.cover),
-                          ),
-                        )
-                      : GestureDetector(
-                          onTap: localImagePicker,
-                          child: Container(
-                            decoration: BoxDecoration(border: Border.all(color: Colors.black), borderRadius: BorderRadius.circular(20)),
-                            child: Center(child: Text("Pick Image")),
-                          ),
-                        ),
+                  child: GestureDetector(
+                    onTap: localImagePicker,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20.0),
+                      child: _savedImagePath != null ? Image.file(File(_savedImagePath!), fit: BoxFit.cover) : Center(child: Icon(Icons.add_a_photo, size: 40,)),
+                    ),
+                  )
                 ),
+                const SizedBox(height: 10,),
                 Padding(
                   padding: EdgeInsets.all(10),
                   child: Form(
@@ -303,7 +295,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
                           onTap: _showDatePicker,
                           child: Container(
                             height: size.height*0.08,
-                            decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade600), borderRadius: BorderRadius.circular(20)),
+                            decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade600), borderRadius: BorderRadius.circular(12)),
                             padding: const EdgeInsets.symmetric(horizontal: 15.0),
                             alignment: Alignment.centerLeft,
                             child: Row(
@@ -313,12 +305,12 @@ class _AddUserScreenState extends State<AddUserScreen> {
                                   children: [
                                     Icon(Icons.date_range),
                                     SizedBox(width: size.width*0.02),
-                                    Text("DOB", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.grey.shade800)),
+                                    Text("DOB", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Color(0xff2C2C2C))),
                                   ],
                                 ),
                                 Text(
                                   _selectedDOB != null ? DateFormat('dd/MM/yyyy').format(_selectedDOB!) : "Select Date",
-                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: _selectedDOB != null ? Colors.black : Colors.grey.shade600),
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: _selectedDOB != null ? Color(0xff2C2C2C) : Colors.grey.shade600),
                                 ),
                               ],
                             ),
@@ -327,7 +319,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
                         const SizedBox(height: 20),
                         Container(
                           height: size.height*0.08,
-                          decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade600), borderRadius: BorderRadius.circular(20)),
+                          decoration: BoxDecoration(border: Border.all(color: Color(0xff2C2C2C)), borderRadius: BorderRadius.circular(12)),
                           padding: const EdgeInsets.symmetric(horizontal: 15.0),
                           alignment: Alignment.centerLeft,
                           child: Row(
@@ -337,7 +329,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
                                 children: [
                                   Icon(Icons.location_city ),
                                     SizedBox(width: size.width*0.02),
-                                  Text("City", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.grey.shade800)),
+                                  Text("City", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Color(0xff2C2C2C))),
                                 ],
                               ),
                               Container(
@@ -373,7 +365,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
                         const SizedBox(height: 20),
                         Container(
                           height: size.height*0.08,
-                          decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade600), borderRadius: BorderRadius.circular(20)),
+                          decoration: BoxDecoration(border: Border.all(color: Color(0xff2C2C2C)), borderRadius: BorderRadius.circular(12)),
                           padding: const EdgeInsets.symmetric(horizontal: 15.0),
                           alignment: Alignment.centerLeft,
                           child: Row(
@@ -383,7 +375,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
                                 children: [
                                   Image.asset("asset/images/gender-dark.png",width: 24, height: 24,),
                                   SizedBox(width: size.width*0.02),
-                                  Text("Gender", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.grey.shade800)),
+                                  Text("Gender", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Color(0xff2C2C2C))),
                                 ],
                               ),
                               Row(
@@ -401,7 +393,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
                         const SizedBox(height: 20),
                         Container(
                           height: size.height*0.08,
-                          decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade600), borderRadius: BorderRadius.circular(20)),
+                          decoration: BoxDecoration(border: Border.all(color: Color(0xff2C2C2C)), borderRadius: BorderRadius.circular(12)),
                           padding: const EdgeInsets.symmetric(horizontal: 15.0),
                           alignment: Alignment.centerLeft,
                           child: Row(
@@ -411,10 +403,10 @@ class _AddUserScreenState extends State<AddUserScreen> {
                                 children: [
                                   Icon(Icons.check_box_outlined),
                                   SizedBox(width: size.width*0.02),
-                                  Text("Hobbies", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.grey.shade800)),
+                                  Text("Hobbies", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Color(0xff2C2C2C))),
                                 ],
                               ),
-                              IconButton(icon: const Icon(Icons.edit, color: Colors.grey), onPressed: _showCustomHobbiesDialog),
+                              IconButton(icon: const Icon(Icons.edit, color: Color(0xff2C2C2C)), onPressed: _showCustomHobbiesDialog),
                             ],
                           ),
                         ),

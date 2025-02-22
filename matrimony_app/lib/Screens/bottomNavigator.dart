@@ -8,6 +8,7 @@ import 'package:matrimony_app/Screens/searchUser.dart';
 import 'package:matrimony_app/Screens/splashScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// ignore: must_be_immutable
 class RootScreen extends StatefulWidget {
   int? userId;
   RootScreen({super.key, this.userId});
@@ -36,7 +37,6 @@ class _RootScreenState extends State<RootScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     return PopScope(
       canPop: false,
       child: Scaffold(
@@ -88,7 +88,8 @@ class _RootScreenState extends State<RootScreen> {
           backgroundColor: Color(0xffF4F4F4),
           buttonBackgroundColor: Color(0xff003366),
           color: Color(0xff003366),
-          animationDuration: Duration(milliseconds: 400),
+          animationDuration: Duration(milliseconds: 500),
+          animationCurve: TreeSliver.defaultAnimationCurve,
           index: currentScreen,
           items: <Widget>[
             Icon(Icons.search, color: Color(0xffF4F4F4)),
