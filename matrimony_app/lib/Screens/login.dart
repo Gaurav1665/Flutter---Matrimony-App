@@ -47,8 +47,7 @@ class _LoginState extends State<Login> {
     if (isValid) {
       try {
         if(_emailController.text == "admin@gmail.com" && _passwordController.text == "admin@123"){
-          Fluttertoast.showToast(msg: "Login Successfully");
-
+          Fluttertoast.showToast(msg: "Login Successfully", backgroundColor: Colors.greenAccent);
           final prefs = await SharedPreferences.getInstance();
           prefs.setBool('isLoggedIn', true);
 

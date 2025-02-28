@@ -82,13 +82,13 @@ class _RootScreenState extends State<RootScreen> {
         body: PageView(
           controller: controller,
           children: screen,
-          physics: const NeverScrollableScrollPhysics(),
+          physics: NeverScrollableScrollPhysics(),
         ),
         bottomNavigationBar: CurvedNavigationBar(
           backgroundColor: Color(0xffF4F4F4),
           buttonBackgroundColor: Color(0xff003366),
           color: Color(0xff003366),
-          animationDuration: Duration(milliseconds: 500),
+          animationDuration: Duration(milliseconds: 300),
           animationCurve: TreeSliver.defaultAnimationCurve,
           index: currentScreen,
           items: <Widget>[

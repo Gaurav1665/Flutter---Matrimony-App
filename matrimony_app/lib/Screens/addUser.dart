@@ -36,7 +36,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
   String? _selectedGender;
   final List<String> cities = ["Mumbai", "Delhi", "Bangalore", "Kolkata", "Chennai", "Hyderabad"];
   final List<String> hobbies = ["Reading", "Traveling", "Gaming", "Cooking", "Sports"];
-  List<String> _selectedHobbies = [];
+  List<dynamic> _selectedHobbies = [];
   bool passwordVisible = true;
   bool confirmPasswordVisible = true;
   bool? _isFavorite;
@@ -65,7 +65,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
         _selectedCity = user.userCity;
         _selectedGender = user.userGender;
         _selectedDOB = DateTime.parse(user.userDOB);
-        _selectedHobbies = user.userHobbies.split(" ");
+        _selectedHobbies = user.userHobbies!;
         _isFavorite = user.isFavorite;
       });
     } catch (e) {
@@ -162,19 +162,19 @@ class _AddUserScreenState extends State<AddUserScreen> {
   }
 
   Future<void> _showDatePicker() async {
-  DateTime? pickedDate = await showDatePicker(
-    context: context,
-    initialDate: _selectedDOB ?? DateTime(DateTime.now().year - 18),
-    firstDate: DateTime(DateTime.now().year - 80),
-    lastDate: DateTime(DateTime.now().year - 18)
-  );
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _selectedDOB ?? DateTime(DateTime.now().year - 18),
+      firstDate: DateTime(DateTime.now().year - 80),
+      lastDate: DateTime(DateTime.now().year - 18)
+    );
 
-  if (pickedDate != null) {
-    setState(() {
-      _selectedDOB = pickedDate;
-    });
+    if (pickedDate != null) {
+      setState(() {
+        _selectedDOB = pickedDate;
+      });
+    }
   }
-}
 
   void _showCustomHobbiesDialog() {
     showDialog(
@@ -201,7 +201,6 @@ class _AddUserScreenState extends State<AddUserScreen> {
                           }
                         });
                         setState(() {});
-                        print(_selectedHobbies);
                       },  
                     );
                   }).toList(),
@@ -228,6 +227,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
         body: Padding(
           padding: const EdgeInsets.all(10),
           child: SingleChildScrollView(
+            physics: BouncingScrollPhysics(),
             child: Column(
               children: [
                 Container(
@@ -248,7 +248,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
                     onTap: localImagePicker,
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20.0),
-                      child: _savedImagePath != null ? Image.file(File(_savedImagePath!), fit: BoxFit.cover) : Center(child: Icon(Icons.add_a_photo, size: 40,)),
+                      child: _savedImagePath != null ? Image(image: _savedImagePath=="asset/images/default.png" ? AssetImage(_savedImagePath!) : FileImage(File(_savedImagePath!)),fit: BoxFit.cover,) : Center(child: Icon(Icons.add_a_photo, size: 40,)),
                     ),
                   )
                 ),
@@ -429,7 +429,6 @@ class _AddUserScreenState extends State<AddUserScreen> {
                             } else if (_selectedHobbies.isEmpty) {
                               Fluttertoast.showToast(msg: "Please select User's Hobbies", backgroundColor: Colors.redAccent);
                             } else if (_formKey.currentState!.validate()) {
-                              String hobbiesString = _selectedHobbies.join(" ");
                               if (widget.userId == null) {
                                 await userProvider.addUser (user: UserModel(
                                   userFullName: _fullNameController!.text,
@@ -439,10 +438,11 @@ class _AddUserScreenState extends State<AddUserScreen> {
                                   userCity: _selectedCity!,
                                   userGender: _selectedGender!,
                                   userDOB: _selectedDOB.toString(),
-                                  userHobbies: hobbiesString,
+                                  userHobbies: _selectedHobbies,
                                   password: _passwordController!.text,
                                   isFavorite: false,
                                 ));
+                                
                                 Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => RootScreen()));
                               } else {
                                 await userProvider.updateUser (user: UserModel(
@@ -454,7 +454,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
                                   userCity: _selectedCity!,
                                   userGender: _selectedGender!,
                                   userDOB: _selectedDOB.toString(),
-                                  userHobbies: hobbiesString,
+                                  userHobbies: _selectedHobbies,
                                   password: _passwordController!.text,
                                   isFavorite: _isFavorite!,
                                 ));

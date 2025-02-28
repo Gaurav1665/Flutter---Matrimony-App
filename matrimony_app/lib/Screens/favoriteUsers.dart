@@ -101,6 +101,7 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
 
                 return Expanded(
                   child: ListView.builder(
+                    physics: BouncingScrollPhysics(),
                     itemCount: users.length,
                     itemBuilder: (context, index) {
                       UserModel _user = users[index];
@@ -174,7 +175,7 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(15),
-                  child: Image.file(File(user.userImage), fit: BoxFit.cover),
+                  child: Image(image: user.userImage=="asset/images/default.png" ? AssetImage("asset/images/default.png") : FileImage(File(user.userImage)),fit: BoxFit.cover,),
                 ),
               ),
               const SizedBox(width: 5),

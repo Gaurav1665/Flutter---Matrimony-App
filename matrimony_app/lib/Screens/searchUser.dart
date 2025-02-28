@@ -98,6 +98,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
                 List<UserModel> users = isSorted ? snapshot.data! : snapshot.data!.reversed.toList();
                 return Expanded(
                   child: ListView.builder(
+                    physics: BouncingScrollPhysics(),
                     itemCount: users.length,
                     itemBuilder: (context, index) {
                       UserModel _user = users[index];
@@ -143,7 +144,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
                 width: size.width * 0.3,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(100),
-                  child: Image.file(File(user.userImage), fit: BoxFit.cover),
+                  child: Image(image: user.userImage=="asset/images/default.png" ? AssetImage("asset/images/default.png") : FileImage(File(user.userImage)),fit: BoxFit.cover,),
                 ),
               ),
               SizedBox(height: 10),
@@ -154,7 +155,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
               _buildTableRow("City:", user.userCity),
               _buildTableRow("Gender:", user.userGender),
               _buildTableRow("DOB:", user.userDOB),
-              _buildTableRow("Hobbies:", user.userHobbies),
+              _buildTableRow("Hobbies:", user.userHobbies!.toString()),
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
@@ -277,7 +278,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(15),
-                  child: Image.file(File(user.userImage), fit: BoxFit.cover),
+                  child: Image(image: user.userImage=="asset/images/default.png" ? AssetImage("asset/images/default.png") : FileImage(File(user.userImage)),fit: BoxFit.cover,),
                 ),
               ),
               const SizedBox(width: 5),

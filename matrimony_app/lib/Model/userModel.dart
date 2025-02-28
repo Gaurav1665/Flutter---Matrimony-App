@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 class UserModel with ChangeNotifier {
   int? userId;
   bool isFavorite;
-  String userFullName, userImage, userEmail, userContact, userCity, userGender, userDOB, userHobbies, password;
+  String userFullName, userImage, userEmail, userContact, userCity, userGender, userDOB, password;
+  List<dynamic>? userHobbies;
 
   UserModel({
     this.userId,

@@ -48,6 +48,7 @@ dependencies:
   google_fonts: ^6.2.1
   fluttertoast: ^8.2.12
   shared_preferences: ^2.5.2
+  http: ^1.3.0
 
 dev_dependencies:
   flutter_test:
@@ -80,6 +81,7 @@ flutter:
   assets:
     - asset/database/matrimony.db
     - asset/images/login.png
+    - asset/images/default.png
     - asset/images/
     - asset/logo/logo.png
 
