@@ -25,7 +25,7 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
 
   Future<List<UserModel>> getFavoriteUsers() async {
     UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
-    List<UserModel> allUsers = await userProvider.fetchUser();
+    List<UserModel> allUsers = await userProvider.fetchUser(context: context);
     List<UserModel> favorite = allUsers.where((user) => user.isFavorite).toList();
     print(favorite.toList());
     return favorite;
@@ -43,8 +43,13 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
   }
 
   void onSearchTextChanged(String value) {
-    setState(() {
-      searchedUser = searchUser(searchText: value);
+    // Use addPostFrameCallback to delay the setState until after the current frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          searchedUser = searchUser(searchText: value);
+        });
+      }
     });
   }
 
@@ -66,8 +71,13 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
                       icon: Icon(Icons.clear),
                       onPressed: () {
                         search.clear();
-                        setState(() {
-                          searchedUser = getFavoriteUsers();
+                        // Defer the setState to after the current frame
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted) {
+                            setState(() {
+                              searchedUser = getFavoriteUsers();
+                            });
+                          }
                         });
                       },
                     ),
@@ -89,7 +99,7 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
               future: searchedUser,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting)
-                  return Center(child: CircularProgressIndicator());
+                  return Expanded(child: Center(child: CircularProgressIndicator(color: Color(0xff003366),)));
 
                 if (snapshot.hasError)
                   return Center(child: Text("Error: ${snapshot.error}"));
@@ -125,8 +135,6 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
     );
   }
 
-
-
   Slideable _listItem({required BuildContext context, required UserModel user}) {
 
     int calculateAge(DateTime dob) {
@@ -147,9 +155,14 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
         ActionItems(
           icon: Icon(user.isFavorite ? Icons.thumb_up : Icons.thumb_up_outlined, color: Colors.blue),
           onPress: () async {
-            user.isFavorite = await userProvider.likebutton(userId: user.userId!, isFavorite: !user.isFavorite);
-            setState(() {
-              searchedUser = getFavoriteUsers();
+            user.isFavorite = await userProvider.likebutton(context: context, userId: user.userId!, isFavorite: !user.isFavorite);
+            // Defer the setState to after the current frame
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                setState(() {
+                  searchedUser = getFavoriteUsers();
+                });
+              }
             });
           },
           backgroudColor: Colors.transparent,

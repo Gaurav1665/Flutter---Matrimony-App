@@ -25,12 +25,12 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
   }
 
   Future<List<UserModel>> getList() async {
-    return await Provider.of<UserProvider>(context, listen: false).fetchUser();
+    return await Provider.of<UserProvider>(context, listen: false).fetchUser(context: context);
   }
 
   Future<List<UserModel>> searchUser({String? searchText}) async {
     UserProvider userProvider = Provider.of<UserProvider>(context, listen: false); // Using listen: false
-    List<UserModel> users = await userProvider.fetchUser();
+    List<UserModel> users = await userProvider.fetchUser(context: context);
     if (searchText == null || searchText.isEmpty) return users;
 
     return users.where((user) =>
@@ -87,7 +87,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
               future: searchedUser,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting)
-                  return Center(child: CircularProgressIndicator());
+                  return Expanded(child: Center(child: CircularProgressIndicator(color: Color(0xff003366),)));
 
                 if (snapshot.hasError)
                   return Center(child: Text("Error: ${snapshot.error}"));
@@ -220,7 +220,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
         ActionItems(
           icon: Icon(user.isFavorite ? Icons.thumb_up : Icons.thumb_up_outlined, color: Colors.blue),
           onPress: () async {
-            user.isFavorite = await userProvider.likebutton(userId: user.userId!, isFavorite: !user.isFavorite);
+            user.isFavorite = await userProvider.likebutton(context: context, userId: user.userId!, isFavorite: !user.isFavorite);
             setState(() {});
           },
           backgroudColor: Colors.transparent,
@@ -243,7 +243,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
                     ),
                     ElevatedButton(
                         onPressed: () async{
-                          await userProvider.deleteUser(user.userId!);
+                          await userProvider.deleteUser(context: context, userId: user.userId!);
                           onSearchTextChanged(search.text);
                           setState(() {});
                           Navigator.of(context).pop();

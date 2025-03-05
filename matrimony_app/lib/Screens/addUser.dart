@@ -53,7 +53,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
   void _loadUserData() async {
     try {
       UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
-      UserModel user = await userProvider.fetchUserById(widget.userId!);
+      UserModel user = await userProvider.fetchUserById(context: context, userId: widget.userId!);
       setState(() {
         _savedImagePath = user.userImage;
         _pickedImage = XFile(user.userImage);
@@ -101,16 +101,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
     // TODO: implement deactivate
     super.deactivate();
     _clearFields();
-  }
-
-  @override
-  void dispose(){
-    // TODO: implement dispose
-    super.dispose();
-    _clearFields();
-  }
-
-  
+  }  
 
   Future<void> localImagePicker() async {
     final ImagePicker imagePicker = ImagePicker();
@@ -430,34 +421,40 @@ class _AddUserScreenState extends State<AddUserScreen> {
                               Fluttertoast.showToast(msg: "Please select User's Hobbies", backgroundColor: Colors.redAccent);
                             } else if (_formKey.currentState!.validate()) {
                               if (widget.userId == null) {
-                                await userProvider.addUser (user: UserModel(
-                                  userFullName: _fullNameController!.text,
-                                  userImage: _savedImagePath!,
-                                  userEmail: _emailController!.text,
-                                  userContact: _contactController!.text,
-                                  userCity: _selectedCity!,
-                                  userGender: _selectedGender!,
-                                  userDOB: _selectedDOB.toString(),
-                                  userHobbies: _selectedHobbies,
-                                  password: _passwordController!.text,
-                                  isFavorite: false,
-                                ));
+                                await userProvider.addUser (
+                                  context: context,
+                                  user: UserModel(
+                                    userFullName: _fullNameController!.text,
+                                    userImage: _savedImagePath!,
+                                    userEmail: _emailController!.text,
+                                    userContact: _contactController!.text,
+                                    userCity: _selectedCity!,
+                                    userGender: _selectedGender!,
+                                    userDOB: _selectedDOB.toString(),
+                                    userHobbies: _selectedHobbies,
+                                    password: _passwordController!.text,
+                                    isFavorite: false,
+                                  )
+                                );
                                 
                                 Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => RootScreen()));
                               } else {
-                                await userProvider.updateUser (user: UserModel(
-                                  userId: widget.userId!,
-                                  userFullName: _fullNameController!.text,
-                                  userImage: _savedImagePath!,
-                                  userEmail: _emailController!.text,
-                                  userContact: _contactController!.text,
-                                  userCity: _selectedCity!,
-                                  userGender: _selectedGender!,
-                                  userDOB: _selectedDOB.toString(),
-                                  userHobbies: _selectedHobbies,
-                                  password: _passwordController!.text,
-                                  isFavorite: _isFavorite!,
-                                ));
+                                await userProvider.updateUser(
+                                  context: context,
+                                  user: UserModel(
+                                    userId: widget.userId!,
+                                    userFullName: _fullNameController!.text,
+                                    userImage: _savedImagePath!,
+                                    userEmail: _emailController!.text,
+                                    userContact: _contactController!.text,
+                                    userCity: _selectedCity!,
+                                    userGender: _selectedGender!,
+                                    userDOB: _selectedDOB.toString(),
+                                    userHobbies: _selectedHobbies,
+                                    password: _passwordController!.text,
+                                    isFavorite: _isFavorite!,
+                                  )
+                                );
                                 Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => RootScreen()));
                               }
                             }
