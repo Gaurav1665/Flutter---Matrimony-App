@@ -3,12 +3,12 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:flutter/src/material/date_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:matrimony_app/Model/userModel.dart';
 import 'package:matrimony_app/Provider/userProvider.dart';
 import 'package:matrimony_app/Screens/bottomNavigator.dart';
 import 'package:matrimony_app/Services/validator.dart';
+import 'package:matrimony_app/Utilities/utility.dart';
 import 'package:matrimony_app/Widgets/customWidgets.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -44,6 +44,7 @@ class _AddUserScreenState extends State<AddUserScreen> {
   @override
   void initState() {
     super.initState();
+    if(!mounted) _clearFields();
     _initializeEmptyFields();
     if (widget.userId != null) {
       _loadUserData();
@@ -54,20 +55,23 @@ class _AddUserScreenState extends State<AddUserScreen> {
     try {
       UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
       UserModel user = await userProvider.fetchUserById(context: context, userId: widget.userId!);
-      setState(() {
-        _savedImagePath = user.userImage;
-        _pickedImage = XFile(user.userImage);
-        _fullNameController = TextEditingController(text: user.userFullName);
-        _emailController = TextEditingController(text: user.userEmail);
-        _contactController = TextEditingController(text: user.userContact);
-        _passwordController = TextEditingController(text: user.password);
-        _confirmPasswordController = TextEditingController(text: user.password);
-        _selectedCity = user.userCity;
-        _selectedGender = user.userGender;
-        _selectedDOB = DateTime.parse(user.userDOB);
-        _selectedHobbies = user.userHobbies!;
-        _isFavorite = user.isFavorite;
-      });
+      if (mounted) {
+          setState(() {
+            _savedImagePath = user.userImage;
+            _pickedImage = XFile(user.userImage);
+            _fullNameController = TextEditingController(text: user.userFullName);
+            _emailController = TextEditingController(text: user.userEmail);
+            _contactController = TextEditingController(text: user.userContact);
+            _passwordController = TextEditingController(text: user.password);
+            _confirmPasswordController = TextEditingController(text: user.password);
+            _selectedCity = user.userCity;
+            _selectedGender = user.userGender;
+            _selectedDOB = DateTime.parse(user.userDOB);
+            _selectedHobbies = user.userHobbies!;
+            _isFavorite = user.isFavorite;
+          }
+        );
+      }
     } catch (e) {
       Fluttertoast.showToast(msg: "Error loading user data: $e", backgroundColor: Colors.redAccent);
     }
@@ -96,49 +100,46 @@ class _AddUserScreenState extends State<AddUserScreen> {
   }
 
 
-  @override
-  void deactivate() {
-    // TODO: implement deactivate
-    super.deactivate();
-    _clearFields();
-  }  
+  
 
   Future<void> localImagePicker() async {
     final ImagePicker imagePicker = ImagePicker();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Choose Image Source"),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              _pickedImage = await imagePicker.pickImage(source: ImageSource.camera, imageQuality: 25);
-              if (_pickedImage != null) await _saveImageToFolder(_pickedImage!);
-            },
-            child: const Text("Camera"),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              _pickedImage = await imagePicker.pickImage(source: ImageSource.gallery, imageQuality: 25);
-              if (_pickedImage != null) await _saveImageToFolder(_pickedImage!);
-            },
-            child: const Text("Gallery"),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              setState(() {
-                _pickedImage = null;
-                _savedImagePath = null;
-              });
-            },
-            child: const Text("Remove"),
-          ),
-        ],
-      ),
-    );
+    if(mounted){
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Choose Image Source"),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                _pickedImage = await imagePicker.pickImage(source: ImageSource.camera, imageQuality: 25);
+                if (_pickedImage != null) await _saveImageToFolder(_pickedImage!);
+              },
+              child: const Text("Camera"),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                _pickedImage = await imagePicker.pickImage(source: ImageSource.gallery, imageQuality: 25);
+                if (_pickedImage != null) await _saveImageToFolder(_pickedImage!);
+              },
+              child: const Text("Gallery"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                setState(() {
+                  _pickedImage = null;
+                  _savedImagePath = null;
+                });
+              },
+              child: const Text("Remove"),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   Future<void> _saveImageToFolder(XFile imageFile) async {
@@ -168,43 +169,45 @@ class _AddUserScreenState extends State<AddUserScreen> {
   }
 
   void _showCustomHobbiesDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text("Select Hobbies"),
-              content: SizedBox(
-                width: double.maxFinite,
-                child: ListView(
-                  shrinkWrap: true,
-                  children: hobbies.map((hobby) {
-                    return CheckboxListTile(
-                      title: Text(hobby),
-                      value: _selectedHobbies.contains(hobby),
-                      onChanged: (bool? isChecked) {
-                        setState(() {
-                          if (isChecked == true) {
-                            _selectedHobbies.add(hobby);
-                          } else {
-                            _selectedHobbies.remove(hobby);
-                          }
-                        });
-                        setState(() {});
-                      },  
-                    );
-                  }).toList(),
+    if(mounted){
+      showDialog(
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                title: const Text("Select Hobbies"),
+                content: SizedBox(
+                  width: double.maxFinite,
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: hobbies.map((hobby) {
+                      return CheckboxListTile(
+                        title: Text(hobby),
+                        value: _selectedHobbies.contains(hobby),
+                        onChanged: (bool? isChecked) {
+                          setState(() {
+                            if (isChecked == true) {
+                              _selectedHobbies.add(hobby);
+                            } else {
+                              _selectedHobbies.remove(hobby);
+                            }
+                          });
+                          setState(() {});
+                        },  
+                      );
+                    }).toList(),
+                  ),
                 ),
-              ),
-              actions: [
-                TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text("Done")),
-              ],
-            );
-          },
-        );
-      },
-    );
+                actions: [
+                  TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text("Done")),
+                ],
+              );
+            },
+          );
+        },
+      );
+    }
   }
 
   @override
@@ -420,42 +423,47 @@ class _AddUserScreenState extends State<AddUserScreen> {
                             } else if (_selectedHobbies.isEmpty) {
                               Fluttertoast.showToast(msg: "Please select User's Hobbies", backgroundColor: Colors.redAccent);
                             } else if (_formKey.currentState!.validate()) {
-                              if (widget.userId == null) {
-                                await userProvider.addUser (
-                                  context: context,
-                                  user: UserModel(
-                                    userFullName: _fullNameController!.text,
-                                    userImage: _savedImagePath!,
-                                    userEmail: _emailController!.text,
-                                    userContact: _contactController!.text,
-                                    userCity: _selectedCity!,
-                                    userGender: _selectedGender!,
-                                    userDOB: _selectedDOB.toString(),
-                                    userHobbies: _selectedHobbies,
-                                    password: _passwordController!.text,
-                                    isFavorite: false,
-                                  )
-                                );
-                                
-                                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => RootScreen()));
+                              Utility utility = Utility();
+                              if( await utility.isInternetAvailable(context) ){
+                                if (widget.userId == null) {
+                                  await userProvider.addUser (
+                                    context: context,
+                                    user: UserModel(
+                                      userFullName: _fullNameController!.text,
+                                      userImage: _savedImagePath!,
+                                      userEmail: _emailController!.text,
+                                      userContact: _contactController!.text,
+                                      userCity: _selectedCity!,
+                                      userGender: _selectedGender!,
+                                      userDOB: _selectedDOB.toString(),
+                                      userHobbies: _selectedHobbies,
+                                      password: _passwordController!.text,
+                                      isFavorite: false,
+                                    )
+                                  );
+                                  
+                                  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => RootScreen()));
+                                } else {
+                                  await userProvider.updateUser(
+                                    context: context,
+                                    user: UserModel(
+                                      userId: widget.userId!,
+                                      userFullName: _fullNameController!.text,
+                                      userImage: _savedImagePath!,
+                                      userEmail: _emailController!.text,
+                                      userContact: _contactController!.text,
+                                      userCity: _selectedCity!,
+                                      userGender: _selectedGender!,
+                                      userDOB: _selectedDOB.toString(),
+                                      userHobbies: _selectedHobbies,
+                                      password: _passwordController!.text,
+                                      isFavorite: _isFavorite!,
+                                    )
+                                  );
+                                  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => RootScreen()));
+                                }
                               } else {
-                                await userProvider.updateUser(
-                                  context: context,
-                                  user: UserModel(
-                                    userId: widget.userId!,
-                                    userFullName: _fullNameController!.text,
-                                    userImage: _savedImagePath!,
-                                    userEmail: _emailController!.text,
-                                    userContact: _contactController!.text,
-                                    userCity: _selectedCity!,
-                                    userGender: _selectedGender!,
-                                    userDOB: _selectedDOB.toString(),
-                                    userHobbies: _selectedHobbies,
-                                    password: _passwordController!.text,
-                                    isFavorite: _isFavorite!,
-                                  )
-                                );
-                                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => RootScreen()));
+
                               }
                             }
                           },

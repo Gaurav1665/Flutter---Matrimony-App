@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:matrimony_app/Model/userModel.dart';
 import 'package:matrimony_app/Provider/userProvider.dart';
 import 'package:matrimony_app/Screens/bottomNavigator.dart';
+import 'package:matrimony_app/Utilities/utility.dart';
 import 'package:provider/provider.dart';
 import 'package:slideable/slideable.dart';
 
@@ -25,19 +26,37 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
   }
 
   Future<List<UserModel>> getList() async {
-    return await Provider.of<UserProvider>(context, listen: false).fetchUser(context: context);
+    Utility utility = Utility();
+    if (await utility.isInternetAvailable(context)) {
+      try {
+        return await Provider.of<UserProvider>(context, listen: false).fetchUser(context: context);
+      } catch (e) {
+        throw Exception('Error fetching users: $e');
+      }
+    } else {
+      throw Exception('Please Check Your Internet.');
+    }
   }
 
   Future<List<UserModel>> searchUser({String? searchText}) async {
-    UserProvider userProvider = Provider.of<UserProvider>(context, listen: false); // Using listen: false
-    List<UserModel> users = await userProvider.fetchUser(context: context);
-    if (searchText == null || searchText.isEmpty) return users;
+    Utility utility = Utility();
+    if (await utility.isInternetAvailable(context)) {
+      try {
+        UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
+        List<UserModel> users = await userProvider.fetchUser(context: context);
+        if (searchText == null || searchText.isEmpty) return users;
 
-    return users.where((user) =>
-      user.userFullName.toLowerCase().contains(searchText.toLowerCase()) ||
-      user.userCity.toLowerCase().contains(searchText.toLowerCase()) ||
-      user.userEmail.toLowerCase().contains(searchText.toLowerCase())
-    ).toList();
+        return users.where((user) =>
+          user.userFullName.toLowerCase().contains(searchText.toLowerCase()) ||
+          user.userCity.toLowerCase().contains(searchText.toLowerCase()) ||
+          user.userEmail.toLowerCase().contains(searchText.toLowerCase())
+        ).toList();
+      } catch (e) {
+        throw Exception('Error fetching favorite users: $e');
+      }
+    } else {
+      throw Exception('Please Check Your Internet.');
+    }
   }
 
   void onSearchTextChanged(String value) {
@@ -47,7 +66,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+    Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
         padding: EdgeInsets.all(10),
@@ -64,8 +83,10 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
                       icon: Icon(Icons.clear),
                       onPressed: () {
                         search.clear();
-                        setState(() {
-                          searchedUser = getList();
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          setState(() {
+                            searchedUser = getList();
+                          });
                         });
                       },
                     ),
@@ -86,14 +107,17 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
             FutureBuilder<List<UserModel>>(
               future: searchedUser,
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting)
+                if (snapshot.connectionState == ConnectionState.waiting) {
                   return Expanded(child: Center(child: CircularProgressIndicator(color: Color(0xff003366),)));
+                }
 
-                if (snapshot.hasError)
-                  return Center(child: Text("Error: ${snapshot.error}"));
+                if (snapshot.hasError) {
+                  return Expanded(child: Center(child: Text("Error: ${snapshot.error}", style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600), textAlign: TextAlign.center,),),);
+                }
 
-                if (snapshot.data == null || snapshot.data!.isEmpty)
-                  return Expanded(child: Center(child: Text("No User Found")));
+                if (snapshot.data == null || snapshot.data!.isEmpty) {
+                  return Expanded(child: Center(child: Text("No User Found", style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600), textAlign: TextAlign.center,),),);
+                }
 
                 List<UserModel> users = isSorted ? snapshot.data! : snapshot.data!.reversed.toList();
                 return Expanded(
@@ -118,7 +142,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
               }
             ),
             const SizedBox(height: 5),
-            Center(child: Text("Note: swipe left to like or delete user",style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic)),)
+            Center(child: Text("Note: swipe left to like or delete user", style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic))),
           ],
         ),
       ),
@@ -127,6 +151,9 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
 
   void _showUserInfoDialog(BuildContext context, UserModel user) {
     Size size = MediaQuery.of(context).size;
+    
+    if (!mounted) return; // Check if the widget is still in the widget tree
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -144,7 +171,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
                 width: size.width * 0.3,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(100),
-                  child: Image(image: user.userImage=="asset/images/default.png" ? AssetImage("asset/images/default.png") : FileImage(File(user.userImage)),fit: BoxFit.cover,),
+                  child: Image(image: user.userImage == "asset/images/default.png" ? AssetImage("asset/images/default.png") : FileImage(File(user.userImage)), fit: BoxFit.cover),
                 ),
               ),
               SizedBox(height: 10),
@@ -169,6 +196,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
       },
     );
   }
+
 
   Widget _buildTableRow(String label, String value) {
     return Padding(
@@ -228,32 +256,37 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
         ActionItems(
           icon: Icon(Icons.delete, color: Colors.red),
           onPress: () async {
-            showDialog(
-              context: context,
-              builder: (context) {
-                return AlertDialog(
-                  title: Text("Warning"),
-                  content: Text("Are you sure you want to delete this user?"),
-                  actions: [
-                    ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: Text("No")
-                    ),
-                    ElevatedButton(
-                        onPressed: () async{
-                          await userProvider.deleteUser(context: context, userId: user.userId!);
-                          onSearchTextChanged(search.text);
-                          setState(() {});
-                          Navigator.of(context).pop();
-                        },
-                        child: Text("Yes")
-                    ),
-                  ],
-                );
-              },
-            );
+            if (mounted) {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text("Warning"),
+                    content: Text("Are you sure you want to delete this user?"),
+                    actions: [
+                      ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Text("No")
+                      ),
+                      ElevatedButton(
+                          onPressed: () async {
+                            await userProvider.deleteUser(context: context, userId: user.userId!);
+                            if (mounted) {
+                              onSearchTextChanged(search.text);
+                              setState(() {});
+                            }
+                            Navigator.of(context).pop();
+                          },
+                          child: Text("Yes")
+                      ),
+                    ],
+                  );
+                },
+              );
+            }
+
           },
           backgroudColor: Colors.transparent,
         ),
